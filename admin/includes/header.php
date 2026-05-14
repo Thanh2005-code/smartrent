@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+// Kiểm tra: Nếu chưa đăng nhập HOẶC không phải là Admin (role khác 1)
+if (!isset($_SESSION['role']) || $_SESSION['role'] != 1) {
+    // Lập tức đuổi ra ngoài trang đăng nhập
+    header("Location: ../login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
