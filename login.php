@@ -4,25 +4,22 @@ include 'connect.php';
 
 $error = '';
 if (isset($_POST['btn_login'])) {
-    
-    $username = isset($_POST['username']) ? $_POST['username'] : '';
+    $username = isset($_POST['username']) ? mysqli_real_escape_string($conn, $_POST['username']) : '';
     $password_raw = isset($_POST['password']) ? $_POST['password'] : '';
-    
-    // Mã hóa mật khẩu người dùng vừa nhập để đem đi so sánh
+
     $password_md5 = md5($password_raw);
 
-    // Truy vấn kiểm tra với mật khẩu đã mã hóa
-    $sql = "SELECT id, fullname, role FROM users WHERE username='$username' AND password='$password_md5'";
+    $sql = "SELECT ID, Name, Role FROM USER WHERE Username='$username' AND Password='$password_md5'";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        
-        $_SESSION['user_id'] = $row['id'];
-        $_SESSION['fullname'] = $row['fullname'];
-        $_SESSION['role'] = $row['role'];
 
-        if ($row['role'] == 1) {
+        $_SESSION['user_id'] = $row['ID'];
+        $_SESSION['fullname'] = $row['Name']; 
+        $_SESSION['role'] = $row['Role'];
+
+        if ($row['Role'] == 1) {
             header("Location: admin/index.php"); 
         } else {
             header("Location: index.php"); 
@@ -31,8 +28,6 @@ if (isset($_POST['btn_login'])) {
     } else {
         $error = "Sai tên đăng nhập hoặc mật khẩu!";
     }
-    
-    // Đóng kết nối
     $conn->close();
 }
 ?>
