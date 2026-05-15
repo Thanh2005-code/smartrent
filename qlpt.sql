@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 14, 2026 lúc 12:31 PM
+-- Thời gian đã tạo: Th5 15, 2026 lúc 07:38 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -24,265 +24,145 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `contracts`
+-- Cấu trúc bảng cho bảng `districts`
 --
 
-CREATE TABLE `contracts` (
-  `id` int(11) NOT NULL,
-  `room_id` int(11) NOT NULL,
-  `tenant_id` int(11) NOT NULL,
-  `start_date` date NOT NULL,
-  `end_date` date NOT NULL,
-  `deposit` int(11) NOT NULL,
-  `status` tinyint(1) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `districts` (
+  `ID` int(10) NOT NULL,
+  `Name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `districts`
+--
+
+INSERT INTO `districts` (`ID`, `Name`) VALUES
+(1, 'Phường Bến Thủy'),
+(2, 'Phường Trung Đô'),
+(3, 'Phường Trường Thi'),
+(4, 'Phường Hưng Dũng'),
+(5, 'Phường Hồng Sơn');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `invoices`
+-- Cấu trúc bảng cho bảng `motel`
 --
 
-CREATE TABLE `invoices` (
-  `id` int(11) NOT NULL,
-  `room_id` int(11) NOT NULL,
-  `month` int(2) NOT NULL,
-  `year` int(4) NOT NULL,
-  `room_price` int(11) NOT NULL,
-  `elec_old` int(11) DEFAULT 0,
-  `elec_new` int(11) DEFAULT 0,
-  `water_old` int(11) DEFAULT 0,
-  `water_new` int(11) DEFAULT 0,
-  `total_amount` int(11) NOT NULL,
-  `status` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `issues`
---
-
-CREATE TABLE `issues` (
-  `id` int(11) NOT NULL,
-  `room_id` int(11) NOT NULL,
+CREATE TABLE `motel` (
+  `ID` int(10) NOT NULL,
   `title` varchar(255) NOT NULL,
-  `content` text NOT NULL,
-  `status` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `description` text DEFAULT NULL,
+  `price` int(11) DEFAULT NULL,
+  `area` int(11) DEFAULT NULL,
+  `count_view` int(11) DEFAULT 0,
+  `address` varchar(255) DEFAULT NULL,
+  `lating` varchar(255) DEFAULT NULL,
+  `images` varchar(255) DEFAULT NULL,
+  `user_id` int(10) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `district_id` int(11) DEFAULT NULL,
+  `utilities` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `phone` varchar(255) DEFAULT NULL,
+  `approve` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `motel`
+--
+
+INSERT INTO `motel` (`ID`, `title`, `description`, `price`, `area`, `count_view`, `address`, `lating`, `images`, `user_id`, `category_id`, `district_id`, `utilities`, `created_at`, `phone`, `approve`) VALUES
+(1, 'Phòng trọ khép kín gần ĐH Vinh', 'Phòng rộng rãi, an ninh tốt, cách cổng chính ĐH Vinh 200m.', 1500000, 20, 150, 'Số 10 Bạch Liêu', NULL, 'phong1.jpg', 1, 1, 1, 'Wifi, Điều hòa, Nóng lạnh', '2026-05-15 17:28:43', '0987654321', 1),
+(2, 'Chung cư mini cao cấp', 'Full nội thất, chỉ việc xách vali vào ở, giờ giấc tự do.', 3500000, 35, 300, 'Số 5 Nguyễn Du', NULL, 'phong2.jpg', 2, 2, 3, 'Giường, Tủ, Máy giặt, Điều hòa', '2026-05-15 17:28:43', '0912345678', 1),
+(3, 'Nhà nguyên căn hẻm ô tô', 'Thích hợp ở ghép nhóm 4-5 người, điện nước giá dân.', 5000000, 80, 50, 'Ngõ 20 Phượng Hoàng', NULL, 'phong3.jpg', 3, 3, 2, 'Bếp, Sân phơi, Chỗ để xe', '2026-05-15 17:28:43', '0933334444', 1),
+(4, 'Phòng trọ giá rẻ cho sinh viên', 'Khu trọ an ninh, chủ nhà thân thiện, không chung chủ.', 1200000, 15, 80, 'Số 8 Phong Đình Cảng', NULL, 'phong4.jpg', 1, 1, 4, 'Wifi, Giường cá nhân', '2026-05-15 17:28:43', '0987654321', 1),
+(5, 'Căn hộ Studio hiện đại', 'Mới xây, thiết kế hiện đại, view đẹp. Đang chờ Admin duyệt.', 2500000, 25, 20, 'Số 12 Lê Lợi', NULL, 'phong5.jpg', 4, 2, 5, 'Full đồ, Thang máy, Khóa vân tay', '2026-05-15 17:28:43', '0999888777', 0);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `rooms`
+-- Cấu trúc bảng cho bảng `user`
 --
 
-CREATE TABLE `rooms` (
-  `id` int(11) NOT NULL,
-  `room_name` varchar(50) NOT NULL,
-  `area` float NOT NULL,
-  `price` int(11) NOT NULL,
-  `status` tinyint(1) DEFAULT 0,
-  `description` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `user` (
+  `ID` int(10) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Username` varchar(255) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Role` int(11) DEFAULT 0,
+  `Phone` varchar(255) DEFAULT NULL,
+  `Avatar` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `rooms`
+-- Đang đổ dữ liệu cho bảng `user`
 --
 
-INSERT INTO `rooms` (`id`, `room_name`, `area`, `price`, `status`, `description`) VALUES
-(1, 'Phòng 101', 20.5, 2000000, 0, NULL),
-(2, 'Phòng 102', 25, 2500000, 1, NULL),
-(3, 'Phòng 103', 18, 1500000, 0, NULL);
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `services`
---
-
-CREATE TABLE `services` (
-  `id` int(11) NOT NULL,
-  `service_name` varchar(100) NOT NULL,
-  `unit_price` int(11) NOT NULL,
-  `unit` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Đang đổ dữ liệu cho bảng `services`
---
-
-INSERT INTO `services` (`id`, `service_name`, `unit_price`, `unit`) VALUES
-(1, 'Điện', 3500, 'kWh'),
-(2, 'Nước', 20000, 'Khối'),
-(3, 'Internet', 100000, 'Tháng'),
-(4, 'Rác', 30000, 'Tháng');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `tenants`
---
-
-CREATE TABLE `tenants` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `cccd` varchar(20) NOT NULL,
-  `dob` date DEFAULT NULL,
-  `hometown` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `users`
---
-
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `fullname` varchar(255) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` tinyint(1) DEFAULT 0,
-  `phone` varchar(20) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Đang đổ dữ liệu cho bảng `users`
---
-
-INSERT INTO `users` (`id`, `fullname`, `username`, `password`, `role`, `phone`, `email`) VALUES
-(1, 'Trần Thị Thanh', 'admin', '123456', 1, '0987654321', 'thanh@smartrent.vn'),
-(2, 'Khách Thuê 1', 'khach1', '123456', 0, '0111222333', 'khach1@gmail.com');
+INSERT INTO `user` (`ID`, `Name`, `Username`, `Email`, `Password`, `Role`, `Phone`, `Avatar`) VALUES
+(1, 'Trần Thị Thanh', 'thanhadmin', 'thanh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 1, '0987654321', 'avatar_thanh.jpg'),
+(2, 'Trần Thị Ánh', 'anhuser', 'anh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0912345678', 'avatar_anh.jpg'),
+(3, 'Trần Thị Thùy', 'thuyuser', 'thuy@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0933334444', 'avatar_thuy.jpg'),
+(4, 'Vương Đình Quang', 'quangvd', 'quangvd@vinhuni.edu.vn', 'e10adc3949ba59abbe56e057f20f883e', 1, '0999888777', 'avatar_quang.jpg'),
+(5, 'Nguyễn Văn Khách', 'khachthue', 'khach@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0909090909', 'avatar_khach.jpg');
 
 --
 -- Chỉ mục cho các bảng đã đổ
 --
 
 --
--- Chỉ mục cho bảng `contracts`
+-- Chỉ mục cho bảng `districts`
 --
-ALTER TABLE `contracts`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `room_id` (`room_id`),
-  ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `districts`
+  ADD PRIMARY KEY (`ID`);
 
 --
--- Chỉ mục cho bảng `invoices`
+-- Chỉ mục cho bảng `motel`
 --
-ALTER TABLE `invoices`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `room_id` (`room_id`);
+ALTER TABLE `motel`
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `district_id` (`district_id`);
 
 --
--- Chỉ mục cho bảng `issues`
+-- Chỉ mục cho bảng `user`
 --
-ALTER TABLE `issues`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `room_id` (`room_id`);
-
---
--- Chỉ mục cho bảng `rooms`
---
-ALTER TABLE `rooms`
-  ADD PRIMARY KEY (`id`);
-
---
--- Chỉ mục cho bảng `services`
---
-ALTER TABLE `services`
-  ADD PRIMARY KEY (`id`);
-
---
--- Chỉ mục cho bảng `tenants`
---
-ALTER TABLE `tenants`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- Chỉ mục cho bảng `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`ID`);
 
 --
 -- AUTO_INCREMENT cho các bảng đã đổ
 --
 
 --
--- AUTO_INCREMENT cho bảng `contracts`
+-- AUTO_INCREMENT cho bảng `districts`
 --
-ALTER TABLE `contracts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `districts`
+  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `invoices`
+-- AUTO_INCREMENT cho bảng `motel`
 --
-ALTER TABLE `invoices`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `motel`
+  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `issues`
+-- AUTO_INCREMENT cho bảng `user`
 --
-ALTER TABLE `issues`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `rooms`
---
-ALTER TABLE `rooms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT cho bảng `services`
---
-ALTER TABLE `services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT cho bảng `tenants`
---
-ALTER TABLE `tenants`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `user`
+  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
 --
 
 --
--- Các ràng buộc cho bảng `contracts`
+-- Các ràng buộc cho bảng `motel`
 --
-ALTER TABLE `contracts`
-  ADD CONSTRAINT `contracts_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`),
-  ADD CONSTRAINT `contracts_ibfk_2` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`);
-
---
--- Các ràng buộc cho bảng `invoices`
---
-ALTER TABLE `invoices`
-  ADD CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`);
-
---
--- Các ràng buộc cho bảng `issues`
---
-ALTER TABLE `issues`
-  ADD CONSTRAINT `issues_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`);
-
---
--- Các ràng buộc cho bảng `tenants`
---
-ALTER TABLE `tenants`
-  ADD CONSTRAINT `tenants_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+ALTER TABLE `motel`
+  ADD CONSTRAINT `motel_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`ID`),
+  ADD CONSTRAINT `motel_ibfk_2` FOREIGN KEY (`district_id`) REFERENCES `districts` (`ID`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
