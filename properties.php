@@ -1,6 +1,25 @@
 <?php
 session_start();
-include 'connect.php'; 
+require_once __DIR__ . '/includes/helpers.php';
+include 'connect.php';
+
+$district = isset($_GET['district']) ? trim((string) $_GET['district']) : '';
+$price = isset($_GET['price']) ? trim((string) $_GET['price']) : '';
+$utility = isset($_GET['utility']) ? trim((string) $_GET['utility']) : '';
+$search = smartrent_build_motel_search($district, $price, $utility);
+
+$sql = "SELECT motel.*, districts.Name AS district_name, user.Name AS owner_name
+        FROM motel
+        JOIN districts ON motel.district_id = districts.ID
+        JOIN user ON motel.user_id = user.ID
+        WHERE " . $search['sql'] . "
+        ORDER BY motel.created_at DESC";
+$stmt = $conn->prepare($sql);
+if ($search['types'] !== '') {
+    $stmt->bind_param($search['types'], ...$search['params']);
+}
+$stmt->execute();
+$list_res = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -66,7 +85,7 @@ include 'connect.php';
                       <li><a href="properties.php" class="active">Phòng trọ</a></li>
                       <li><a href="contact.php">Liên hệ</a></li>
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <li><a href="profile.php"><i class="fa fa-user"></i> <?php echo $_SESSION['fullname']; ?></a></li>
+                        <li><a href="profile.php"><i class="fa fa-user"></i> <?php echo htmlspecialchars($_SESSION['fullname']); ?></a></li>
                         <li><a href="logout.php" style="background-color: #f35525; color: #fff; border-radius: 25px; padding: 8px 20px !important;">Đăng xuất</a></li>
                     <?php else: ?>
                         <li><a href="login.php"><i class="fa fa-sign-in-alt"></i> Đăng nhập</a></li>
@@ -108,178 +127,35 @@ include 'connect.php';
         </li>
       </ul>
       <div class="row properties-box">
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 adv">
-          <div class="item">
-            <a href="property-details.php"><img src="assets/images/property-01.jpg" alt=""></a>
-            <span class="category">Phòng khép kín</span>
-            <h6>1.500.000 VNĐ</h6>
-            <h4><a href="property-details.php">Số 10 Bạch Liêu, Bến Thủy</a></h4>
-            <ul>
-              <li>Số người ở: <span>2</span></li>
-              <li>Phòng tắm: <span>1</span></li>
-              <li>Diện tích: <span>20m2</span></li>
-              <li>Tầng số: <span>1</span></li>
-              <li>Chỗ để xe: <span>Có (Miễn phí)</span></li>
-            </ul>
-            <div class="main-button">
-              <a href="property-details.php">Xem chi tiết</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 str">
-          <div class="item">
-            <a href="property-details.php"><img src="assets/images/property-02.jpg" alt=""></a>
-            <span class="category">Nhà nguyên căn</span>
-            <h6>4.500.000 VNĐ</h6>
-            <h4><a href="property-details.php">Ngõ 4 Nguyễn Văn Trỗi, Bến Thủy</a></h4>
-            <ul>
-              <li>Phòng ngủ: <span>3</span></li>
-              <li>Phòng tắm: <span>2</span></li>
-              <li>Diện tích: <span>75m2</span></li>
-              <li>Số tầng: <span>2</span></li>
-              <li>Chỗ để xe: <span>Sân rộng</span></li>
-            </ul>
-            <div class="main-button">
-              <a href="property-details.php">Xem chi tiết</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 adv rac">
-          <div class="item">
-            <a href="property-details.php"><img src="assets/images/property-03.jpg" alt=""></a>
-            <span class="category">Chung cư mini</span>
-            <h6>3.200.000 VNĐ</h6>
-            <h4><a href="property-details.php">Chung cư mini đường Lê Duẩn</a></h4>
-            <ul>
-              <li>Phòng ngủ: <span>1</span></li>
-              <li>Phòng tắm: <span>1</span></li>
-              <li>Diện tích: <span>35m2</span></li>
-              <li>Tầng số: <span>3</span></li>
-              <li>Chỗ để xe: <span>Hầm gửi xe</span></li>
-            </ul>
-            <div class="main-button">
-              <a href="property-details.php">Xem chi tiết</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 str">
-          <div class="item">
-            <a href="property-details.php"><img src="assets/images/property-04.jpg" alt=""></a>
-            <span class="category">Phòng khép kín</span>
-            <h6>1.200.000 VNĐ</h6>
-            <h4><a href="property-details.php">Khối 5 phường Trường Thi</a></h4>
-            <ul>
-              <li>Số người ở: <span>2</span></li>
-              <li>Phòng tắm: <span>1</span></li>
-              <li>Diện tích: <span>18m2</span></li>
-              <li>Tầng số: <span>2</span></li>
-              <li>Chỗ để xe: <span>Trong nhà</span></li>
-            </ul>
-            <div class="main-button">
-              <a href="property-details.php">Xem chi tiết</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 rac str">
-          <div class="item">
-            <a href="property-details.php"><img src="assets/images/property-05.jpg" alt=""></a>
-            <span class="category">Chung cư mini</span>
-            <h6>2.800.000 VNĐ</h6>
-            <h4><a href="property-details.php">Căn hộ dịch vụ đường Võ Thị Sáu</a></h4>
-            <ul>
-              <li>Phòng ngủ: <span>1</span></li>
-              <li>Phòng tắm: <span>1</span></li>
-              <li>Diện tích: <span>28m2</span></li>
-              <li>Tầng số: <span>5 (Thang máy)</span></li>
-              <li>Chỗ để xe: <span>Bảo vệ 24/7</span></li>
-            </ul>
-            <div class="main-button">
-              <a href="property-details.php">Xem chi tiết</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 rac adv">
-          <div class="item">
-            <a href="property-details.php"><img src="assets/images/property-06.jpg" alt=""></a>
-            <span class="category">Phòng khép kín</span>
-            <h6>1.600.000 VNĐ</h6>
-            <h4><a href="property-details.php">Ngõ 12 đường Hermann Gmeiner</a></h4>
-            <ul>
-              <li>Số người ở: <span>2</span></li>
-              <li>Phòng tắm: <span>1</span></li>
-              <li>Diện tích: <span>22m2</span></li>
-              <li>Tầng số: <span>1</span></li>
-              <li>Chỗ để xe: <span>Có camera</span></li>
-            </ul>
-            <div class="main-button">
-              <a href="property-details.php">Xem chi tiết</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 rac str">
-          <div class="item">
-            <a href="property-details.php"><img src="assets/images/property-03.jpg" alt=""></a>
-            <span class="category">Nhà nguyên căn</span>
-            <h6>5.000.000 VNĐ</h6>
-            <h4><a href="property-details.php">Nhà mặt đường Phong Định Cảng</a></h4>
-            <ul>
-              <li>Phòng ngủ: <span>4</span></li>
-              <li>Phòng tắm: <span>3</span></li>
-              <li>Diện tích: <span>90m2</span></li>
-              <li>Số tầng: <span>2</span></li>
-              <li>Chỗ để xe: <span>Vỉa hè rộng</span></li>
-            </ul>
-            <div class="main-button">
-              <a href="property-details.php">Xem chi tiết</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 rac adv">
-          <div class="item">
-            <a href="property-details.php"><img src="assets/images/property-02.jpg" alt=""></a>
-            <span class="category">Phòng khép kín</span>
-            <h6>1.400.000 VNĐ</h6>
-            <h4><a href="property-details.php">Gần chợ Quyết, phường Bến Thủy</a></h4>
-            <ul>
-              <li>Số người ở: <span>2</span></li>
-              <li>Phòng tắm: <span>1</span></li>
-              <li>Diện tích: <span>20m2</span></li>
-              <li>Tầng số: <span>2</span></li>
-              <li>Chỗ để xe: <span>Có mái che</span></li>
-            </ul>
-            <div class="main-button">
-              <a href="property-details.php">Xem chi tiết</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 rac adv">
-          <div class="item">
-            <a href="property-details.php"><img src="assets/images/property-01.jpg" alt=""></a>
-            <span class="category">Chung cư mini</span>
-            <h6>3.500.000 VNĐ</h6>
-            <h4><a href="property-details.php">Căn hộ Studio đường Nguyễn Du</a></h4>
-            <ul>
-              <li>Phòng ngủ: <span>1</span></li>
-              <li>Phòng tắm: <span>1</span></li>
-              <li>Diện tích: <span>40m2</span></li>
-              <li>Tầng số: <span>4</span></li>
-              <li>Chỗ để xe: <span>An ninh tốt</span></li>
-            </ul>
-            <div class="main-button">
-              <a href="property-details.php">Xem chi tiết</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
+        <?php if ($list_res->num_rows === 0): ?>
         <div class="col-lg-12">
-          <ul class="pagination">
-            <li><a href="#">1</a></li>
-            <li><a class="is_active" href="#">2</a></li>
-            <li><a href="#">3</a></li>
-            <li><a href="#">>></a></li>
-          </ul>
+          <p class="text-center">Không tìm thấy phòng trọ phù hợp. Vui lòng thử lại với tiêu chí khác.</p>
         </div>
+        <?php else: ?>
+        <?php while ($row = $list_res->fetch_assoc()):
+            $filter_class = smartrent_category_filter_class($row['category_id']);
+            $image_file = smartrent_motel_image($row['images']);
+            $category_name = smartrent_category_name($row['category_id']);
+        ?>
+        <div class="col-lg-4 col-md-6 align-self-center mb-30 properties-items col-md-6 <?php echo $filter_class; ?>">
+          <div class="item">
+            <a href="property-details.php?id=<?php echo (int) $row['ID']; ?>"><img src="assets/images/<?php echo htmlspecialchars($image_file); ?>" alt=""></a>
+            <span class="category"><?php echo htmlspecialchars($category_name); ?></span>
+            <h6><?php echo number_format((int) $row['price'], 0, ',', '.'); ?> VNĐ</h6>
+            <h4><a href="property-details.php?id=<?php echo (int) $row['ID']; ?>"><?php echo htmlspecialchars($row['title']); ?></a></h4>
+            <ul>
+              <li>Người đăng: <span><?php echo htmlspecialchars($row['owner_name']); ?></span></li>
+              <li>Khu vực: <span><?php echo htmlspecialchars($row['district_name']); ?></span></li>
+              <li>Diện tích: <span><?php echo (int) $row['area']; ?>m2</span></li>
+              <li>Tiện ích: <span><?php echo htmlspecialchars($row['utilities']); ?></span></li>
+            </ul>
+            <div class="main-button">
+              <a href="property-details.php?id=<?php echo (int) $row['ID']; ?>">Xem chi tiết</a>
+            </div>
+          </div>
+        </div>
+        <?php endwhile; ?>
+        <?php endif; ?>
       </div>
     </div>
   </div>
