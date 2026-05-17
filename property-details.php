@@ -1,6 +1,39 @@
 <?php
 session_start();
-include 'connect.php'; 
+require_once __DIR__ . '/includes/helpers.php';
+include 'connect.php';
+
+$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+if ($id <= 0) {
+    header('Location: properties.php');
+    exit();
+}
+
+$sql = "SELECT motel.*, districts.Name AS district_name, user.Name AS owner_name,
+               user.Phone AS owner_phone, user.Email AS owner_email, user.Avatar AS owner_avatar
+        FROM motel
+        JOIN districts ON motel.district_id = districts.ID
+        JOIN user ON motel.user_id = user.ID
+        WHERE motel.ID = ? AND motel.approve = 1";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$m = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$m) {
+    header('Location: properties.php');
+    exit();
+}
+
+$conn->query('UPDATE motel SET count_view = count_view + 1 WHERE ID = ' . $id);
+
+$image_file = smartrent_motel_image($m['images']);
+$category_name = smartrent_category_name($m['category_id']);
+$map_url = smartrent_map_embed_url($m['lating'], $m['address']);
+$owner_avatar = smartrent_avatar_url($m['owner_avatar']);
+$price_fmt = number_format((int) $m['price'], 0, ',', '.');
+$created_fmt = date('d/m/Y', strtotime($m['created_at']));
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -97,25 +130,55 @@ include 'connect.php';
       <div class="row">
         <div class="col-lg-8">
           <div class="main-image">
-            <img src="assets/images/single-property.jpg" alt="Hình ảnh phòng trọ">
+            <img src="assets/images/<?php echo htmlspecialchars($image_file); ?>" alt="Hình ảnh phòng trọ">
           </div>
           <div class="main-content">
-            <span class="category">Phòng khép kín</span>
-            <h4>Số 10 Đường Bạch Liêu, Phường Bến Thủy, TP. Vinh</h4>
-            <p>Chào mừng bạn đến với hệ thống tìm kiếm phòng trọ thông minh <strong>Smartrent</strong> dành riêng cho sinh viên Đại học Vinh. Căn phòng khép kín tại trục đường Bạch Liêu sở hữu vị trí cực kỳ đắc địa, giúp bạn tiết kiệm tối đa thời gian di chuyển đến giảng đường, thư viện và các khu vực tiện ích xung quanh trường.
-            
-            <br><br>Phòng được trang bị đầy đủ cơ sở vật chất cơ bản, không gian thoáng đãng, an ninh đảm bảo và có camera giám sát 24/7. Để xem trực tiếp phòng hoặc trao đổi thêm thông tin chi tiết với chính chủ, vui lòng nhấn vào nút liên hệ hẹn lịch hoặc sử dụng hòm thư hỗ trợ trực tuyến của chúng tôi.</p>
+            <span class="category"><?php echo htmlspecialchars($category_name); ?></span>
+            <h4><?php echo htmlspecialchars($m['title']); ?> — <?php echo htmlspecialchars($m['address']); ?>, <?php echo htmlspecialchars($m['district_name']); ?></h4>
+            <p><?php echo nl2br(htmlspecialchars($m['description'])); ?></p>
+            <p><strong>Giá thuê:</strong> <?php echo $price_fmt; ?> VNĐ/tháng &nbsp;|&nbsp; <strong>Tiện ích:</strong> <?php echo htmlspecialchars($m['utilities']); ?></p>
           </div> 
           <div class="accordion" id="accordionExample">
             <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOwner">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOwner" aria-expanded="true" aria-controls="collapseOwner">
+                  Thông tin người đăng
+                </button>
+              </h2>
+              <div id="collapseOwner" class="accordion-collapse collapse show" aria-labelledby="headingOwner" data-bs-parent="#accordionExample">
+                <div class="accordion-collapse-body" style="padding: 20px 25px;">
+                  <?php if ($owner_avatar !== ''): ?>
+                  <img src="<?php echo htmlspecialchars($owner_avatar); ?>" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;margin-bottom:10px;">
+                  <?php endif; ?>
+                  <strong><?php echo htmlspecialchars($m['owner_name']); ?></strong><br>
+                  <i class="fa fa-phone"></i> <?php echo htmlspecialchars($m['phone'] ?: $m['owner_phone']); ?><br>
+                  <i class="fa fa-envelope"></i> <?php echo htmlspecialchars($m['owner_email']); ?><br>
+                  Ngày đăng: <strong><?php echo $created_fmt; ?></strong> | Lượt xem: <strong><?php echo (int) $m['count_view'] + 1; ?></strong>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingMap">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMap" aria-expanded="false" aria-controls="collapseMap">
+                  Bản đồ vị trí
+                </button>
+              </h2>
+              <div id="collapseMap" class="accordion-collapse collapse" aria-labelledby="headingMap" data-bs-parent="#accordionExample">
+                <div class="accordion-collapse-body" style="padding: 20px 25px;">
+                  <iframe src="<?php echo htmlspecialchars($map_url); ?>" width="100%" height="350" style="border:0;" allowfullscreen loading="lazy"></iframe>
+                  <p class="mt-2 mb-0"><i class="fa fa-map-marker"></i> <?php echo htmlspecialchars($m['address']); ?>, <?php echo htmlspecialchars($m['district_name']); ?></p>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
               <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
                   Vị trí này có thuận tiện di chuyển không?
                 </button>
               </h2>
-              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+              <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                 <div class="accordion-collapse-body" style="padding: 20px 25px;">
-                  Cực kỳ thuận tiện! Căn phòng nằm trên trục đường <strong>Bạch Liêu</strong>, ngay sát cổng phụ và khu ký túc xá của <code>Trường Đại học Vinh</code>. Bạn chỉ mất chưa đầy 3 phút đi bộ để đến giảng đường mà không cần lo lắng về vấn đề tắc đường hay phương tiện di chuyển.
+                  Phòng tại <strong><?php echo htmlspecialchars($m['address']); ?></strong>, thuộc <strong><?php echo htmlspecialchars($m['district_name']); ?></strong>, gần khu vực Trường Đại học Vinh.
                 </div>
               </div>
             </div>
@@ -150,19 +213,19 @@ include 'connect.php';
             <ul>
               <li>
                 <img src="assets/images/info-icon-01.png" alt="" style="max-width: 52px;">
-                <h4>20 m2<br><span>Diện tích phòng</span></h4>
+                <h4><?php echo (int) $m['area']; ?> m2<br><span>Diện tích phòng</span></h4>
               </li>
               <li>
                 <img src="assets/images/info-icon-02.png" alt="" style="max-width: 52px;">
-                <h4>Hợp đồng<br><span>Ký kết rõ ràng</span></h4>
+                <h4><?php echo $price_fmt; ?> đ<br><span>Giá thuê / tháng</span></h4>
               </li>
               <li>
                 <img src="assets/images/info-icon-03.png" alt="" style="max-width: 52px;">
-                <h4>Thanh toán<br><span>Linh hoạt hàng tháng</span></h4>
+                <h4><?php echo htmlspecialchars($m['district_name']); ?><br><span>Khu vực</span></h4>
               </li>
               <li>
                 <img src="assets/images/info-icon-04.png" alt="" style="max-width: 52px;">
-                <h4>An ninh<br><span>Camera 24/7</span></h4>
+                <h4><?php echo htmlspecialchars($category_name); ?><br><span>Loại hình</span></h4>
               </li>
             </ul>
           </div>
