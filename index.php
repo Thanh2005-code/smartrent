@@ -1,6 +1,7 @@
 <?php
 session_start();
-include 'connect.php'; 
+require_once __DIR__ . '/includes/helpers.php';
+include 'connect.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -34,6 +35,15 @@ include 'connect.php';
             height: 50px;
             border-radius: 5px;
             border: none;
+        }
+        .navbar-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            margin-right: 6px;
+            border: 2px solid #f35525;
         }
     </style>
 </head>
@@ -81,8 +91,15 @@ include 'connect.php';
                       <li><a href="index.php" class="active">Trang chủ</a></li>
                       <li><a href="properties.php">Phòng trọ</a></li>
                       <li><a href="contact.php">Liên hệ</a></li>
-                    <?php if(isset($_SESSION['user_id'])): ?>
-                        <li><a href="profile.php"><i class="fa fa-user"></i> <?php echo $_SESSION['fullname']; ?></a></li>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <?php
+                        $nav_avatar = isset($_SESSION['avatar']) && $_SESSION['avatar'] !== '' ? smartrent_avatar_url($_SESSION['avatar']) : '';
+                        ?>
+                        <li><a href="profile.php"><?php if ($nav_avatar !== ''): ?>
+                            <img src="<?php echo htmlspecialchars($nav_avatar); ?>" alt="" class="navbar-avatar">
+                        <?php else: ?>
+                            <i class="fa fa-user"></i>
+                        <?php endif; ?> <?php echo htmlspecialchars($_SESSION['fullname']); ?></a></li>
                         <li><a href="logout.php" style="background-color: #f35525; color: #fff; border-radius: 25px; padding: 8px 20px !important;">Đăng xuất</a></li>
                     <?php else: ?>
                         <li><a href="login.php"><i class="fa fa-sign-in-alt"></i> Đăng nhập</a></li>

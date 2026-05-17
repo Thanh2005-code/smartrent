@@ -1,34 +1,60 @@
 <?php
 session_start();
-include 'connect.php'; 
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/helpers.php';
+include 'connect.php';
+
+if (!isset($_SESSION['login_failures'])) {
+    $_SESSION['login_failures'] = 0;
+}
 
 $error = '';
-if (isset($_POST['btn_login'])) {
-    $username = isset($_POST['username']) ? mysqli_real_escape_string($conn, $_POST['username']) : '';
-    $password_raw = isset($_POST['password']) ? $_POST['password'] : '';
+$require_captcha = $_SESSION['login_failures'] >= 3;
 
+if (isset($_POST['btn_login'])) {
+    $username = isset($_POST['username']) ? trim($_POST['username']) : '';
+    $password_raw = isset($_POST['password']) ? $_POST['password'] : '';
     $password_md5 = md5($password_raw);
 
-    $sql = "SELECT ID, Name, Role FROM USER WHERE Username='$username' AND Password='$password_md5'";
-    $result = $conn->query($sql);
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-
-        $_SESSION['user_id'] = $row['ID'];
-        $_SESSION['fullname'] = $row['Name']; 
-        $_SESSION['role'] = $row['Role'];
-
-        if ($row['Role'] == 1) {
-            header("Location: admin/index.php"); 
-        } else {
-            header("Location: index.php"); 
+    if ($require_captcha) {
+        $token = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
+        if (!smartrent_verify_recaptcha(RECAPTCHA_SECRET_KEY, $token)) {
+            $error = 'Vui lòng xác nhận Google reCAPTCHA.';
+            $_SESSION['login_failures']++;
+            $require_captcha = $_SESSION['login_failures'] >= 3;
         }
-        exit();
-    } else {
-        $error = "Sai tên đăng nhập hoặc mật khẩu!";
     }
-    $conn->close();
+
+    if ($error === '') {
+        $stmt = $conn->prepare('SELECT ID, Name, Role, Avatar FROM user WHERE Username = ? AND Password = ?');
+        if ($stmt) {
+            $stmt->bind_param('ss', $username, $password_md5);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $_SESSION['login_failures'] = 0;
+
+                $_SESSION['user_id'] = $row['ID'];
+                $_SESSION['fullname'] = $row['Name'];
+                $_SESSION['role'] = $row['Role'];
+                $_SESSION['avatar'] = $row['Avatar'] ?? '';
+
+                if ($row['Role'] == 1) {
+                    header('Location: admin/index.php');
+                } else {
+                    header('Location: index.php');
+                }
+                exit();
+            }
+            $stmt->close();
+        }
+
+        $_SESSION['login_failures']++;
+        $error = 'Sai tên đăng nhập hoặc mật khẩu!';
+        $require_captcha = $_SESSION['login_failures'] >= 3;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -38,10 +64,13 @@ if (isset($_POST['btn_login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - Smartrent Dashboard</title>
-    
+
     <link rel="stylesheet" crossorigin href="admin/assets/compiled/css/app.css">
     <link rel="stylesheet" crossorigin href="admin/assets/compiled/css/app-dark.css">
     <link rel="stylesheet" crossorigin href="admin/assets/compiled/css/auth.css">
+    <?php if ($require_captcha && RECAPTCHA_SITE_KEY !== ''): ?>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <?php endif; ?>
 </head>
 
 <body>
@@ -57,11 +86,13 @@ if (isset($_POST['btn_login'])) {
                     <p class="auth-subtitle mb-5">Hệ thống quản lý phòng trọ.</p>
 
                     <form method="POST" action="">
-                        
-                        <?php if($error != '') echo "<div class='alert alert-danger'>$error</div>"; ?>
+
+                        <?php if ($error != '') {
+                            echo "<div class='alert alert-danger'>" . htmlspecialchars($error) . '</div>';
+                        } ?>
 
                         <div class="form-group position-relative has-icon-left mb-4">
-                            <input type="text" class="form-control form-control-xl" name="username" placeholder="Tên đăng nhập" required>
+                            <input type="text" class="form-control form-control-xl" name="username" placeholder="Tên đăng nhập" required value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
                             <div class="form-control-icon">
                                 <i class="bi bi-person"></i>
                             </div>
@@ -72,6 +103,27 @@ if (isset($_POST['btn_login'])) {
                                 <i class="bi bi-shield-lock"></i>
                             </div>
                         </div>
+
+                        <?php if ($require_captcha): ?>
+<div class="mb-4">
+    <?php if (RECAPTCHA_SITE_KEY !== ''): ?>
+    <div class="g-recaptcha" 
+         data-sitekey="<?php echo htmlspecialchars(RECAPTCHA_SITE_KEY); ?>" 
+         data-expired-callback="onRecaptchaExpired"></div>
+    
+    <script>
+        function onRecaptchaExpired() {
+            if (typeof grecaptcha !== 'undefined') {
+                grecaptcha.reset();
+            }
+        }
+    </script>
+    <?php else: ?>
+    <div class="alert alert-warning">Chưa cấu hình RECAPTCHA_SITE_KEY trong config.php.</div>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
                         <div class="form-check form-check-lg d-flex align-items-end">
                             <input class="form-check-input me-2" type="checkbox" value="" id="flexCheckDefault">
                             <label class="form-check-label text-gray-600" for="flexCheckDefault">
@@ -80,7 +132,7 @@ if (isset($_POST['btn_login'])) {
                         </div>
                         <button type="submit" name="btn_login" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">Đăng nhập</button>
                     </form>
-                    
+
                     <div class="text-center mt-5 text-lg fs-5">
                         <p class="text-gray-600">Chưa có tài khoản? <a href="register.php" class="font-bold">Đăng ký ngay</a>.</p>
                         <p class="text-muted mt-3"><i>"Chủ trọ nhàn tay phòng đầy mỗi ngày"</i></p>
