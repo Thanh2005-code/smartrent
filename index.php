@@ -134,13 +134,18 @@ include 'connect.php';
         <form action="search.php" method="GET" class="row g-3">
             <div class="col-md-3">
                 <select name="district" class="form-select">
-                    <option value="">Địa điểm (Quận/Huyện)</option>
-                    <?php 
-                    $dist_sql = "SELECT * FROM DISTRICTS";
-                    $dist_res = $conn->query($dist_sql);
-                    while($d = $dist_res->fetch_assoc()) echo "<option value='".$d['ID']."'>".$d['Name']."</option>";
-                    ?>
-                </select>
+    <option value="">Địa điểm (Quận/Huyện)</option>
+    <?php 
+    // Sửa DISTRICTS thành tên bảng viết thường tương ứng trong DB của bạn (ví dụ: districts)
+    $dist_sql = "SELECT * FROM districts"; 
+    $dist_res = $conn->query($dist_sql);
+    if ($dist_res) { // Thêm câu lệnh if này để bao bọc an toàn, tránh bị treo nếu DB trống
+        while($d = $dist_res->fetch_assoc()) {
+            echo "<option value='".$d['ID']."'>".$d['Name']."</option>";
+        }
+    }
+    ?>
+</select>
             </div>
             <div class="col-md-3">
                 <select name="price" class="form-select">
