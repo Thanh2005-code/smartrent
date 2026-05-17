@@ -183,25 +183,105 @@ include 'connect.php';
                   <li class="nav-item"><button class="nav-link" id="vinh-tab" data-bs-toggle="tab" data-bs-target="#vinh" type="button">Gần ĐH Vinh nhất</button></li>
                 </ul>
               </div>              
-              <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="new" role="tabpanel">
-                   <div class="row mt-4">
-                      <p class="text-center"><i>Dữ liệu phòng mới nhất đang cập nhật...</i></p>
-                   </div>
+   <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="new" role="tabpanel">
+        <div class="row mt-4">
+            <?php
+            $sql_new = "SELECT motel.*, districts.Name as district_name, user.Name as owner_name 
+                        FROM motel 
+                        JOIN districts ON motel.district_id = districts.ID 
+                        JOIN user ON motel.user_id = user.ID 
+                        WHERE motel.approve = 1 
+                        ORDER BY motel.created_at DESC 
+                        LIMIT 6";
+            $res_new = $conn->query($sql_new);
+            while($row = $res_new->fetch_assoc()) { render_motel_item($row); }
+            ?>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="view" role="tabpanel">
+        <div class="row mt-4">
+            <?php
+            $sql_view = "SELECT motel.*, districts.Name as district_name, user.Name as owner_name 
+                         FROM motel 
+                         JOIN districts ON motel.district_id = districts.ID 
+                         JOIN user ON motel.user_id = user.ID 
+                         WHERE motel.approve = 1 
+                         ORDER BY motel.count_view DESC 
+                         LIMIT 6";
+            $res_view = $conn->query($sql_view);
+            while($row = $res_view->fetch_assoc()) { render_motel_item($row); }
+            ?>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="vinh" role="tabpanel">
+        <div class="row mt-4">
+            <?php
+            $sql_vinh = "SELECT motel.*, districts.Name as district_name, user.Name as owner_name,
+                                CASE 
+                                    WHEN districts.ID = 2 THEN 1   
+                                    WHEN districts.ID = 1 THEN 2   
+                                    ELSE 3 
+                                END as near_priority
+                         FROM motel 
+                         JOIN districts ON motel.district_id = districts.ID 
+                         JOIN user ON motel.user_id = user.ID 
+                         WHERE motel.approve = 1 
+                         ORDER BY near_priority ASC, motel.count_view DESC 
+                         LIMIT 6";
+            $res_vinh = $conn->query($sql_vinh);
+            while($row = $res_vinh->fetch_assoc()) { render_motel_item($row); }
+            ?>
+        </div>
+    </div>
+</div>
+
+<?php
+function render_motel_item($row) {
+
+    $image_file = '';
+    if (!empty($row['images'])) {
+        $image_path = 'assets/images/' . $row['images'];
+        if (file_exists($image_path)) {
+            $image_file = $row['images'];
+        }
+    }
+    if (empty($image_file)) {
+        $image_file = 'property-01.jpg'; 
+    }
+    ?>
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="item" style="border: 1px solid #eee; border-radius: 10px; overflow: hidden; height: 100%;">
+            <a href="property-details.php?id=<?php echo $row['ID']; ?>">
+                <img src="assets/images/<?php echo $image_file; ?>" alt="<?php echo htmlspecialchars($row['title']); ?>" style="width: 100%; height: 220px; object-fit: cover;">
+            </a>
+            <div class="p-3">
+                <span class="category" style="font-size: 13px; color: #f35525; font-weight: bold;">
+                    <?php echo $row['district_name']; ?>
+                </span>
+                <h6 style="font-size: 18px; margin: 10px 0;"><?php echo number_format($row['price'], 0, ',', '.'); ?> VNĐ</h6>
+                <h4 style="font-size: 16px; height: 40px; overflow: hidden;">
+                    <a href="property-details.php?id=<?php echo $row['ID']; ?>"><?php echo $row['title']; ?></a>
+                </h4>
+                <ul style="list-style: none; padding: 0; margin: 15px 0; font-size: 13px; color: #666;">
+                    <li>Người đăng: <b><?php echo $row['owner_name']; ?></b></li>
+                    <li>Diện tích: <b><?php echo $row['area']; ?>m2</b></li>
+              
+                    <li>Lượt xem: <b><?php echo $row['count_view']; ?></b></li>
+                </ul>
+                <div class="main-button" style="text-align: center;">
+                    <a href="property-details.php?id=<?php echo $row['ID']; ?>" style="background: #1e1e1e; color: #fff; padding: 8px 20px; border-radius: 25px; font-size: 13px;">Xem chi tiết</a>
                 </div>
-                <div class="tab-pane fade" id="view" role="tabpanel">
-                   <div class="row mt-4">
-                      <p class="text-center"><i>Dữ liệu phòng xem nhiều nhất đang cập nhật...</i></p>
-                   </div>
-                </div>
-              </div>
             </div>
+        </div>
+    </div>
+    <?php
+}
+?>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
   <div class="properties section">
     <div class="container">
       <div class="row">
