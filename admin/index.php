@@ -1,6 +1,10 @@
-<?php 
-include '../connect.php'; 
-include 'includes/header.php'; 
+<?php
+session_start();
+if (!isset($_SESSION['role']) || $_SESSION['role'] != 1) {
+    header('Location: ../login.php');
+    exit();
+}
+include '../connect.php';
 ?>
 <?php
 $total_motel = $conn->query("SELECT COUNT(ID) as total FROM MOTEL")->fetch_assoc()['total'];
@@ -40,10 +44,16 @@ $total_views = $conn->query("SELECT SUM(count_view) as total FROM MOTEL")->fetch
                             <a href="index.php" class='sidebar-link'><i class="bi bi-grid-fill"></i> <span>Bảng điều khiển</span></a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="motel_manage.php" class='sidebar-link'><i class="bi bi-house-door-fill"></i> <span>Quản lý phòng trọ</span></a>
+                            <a href="table-datatable.php" class='sidebar-link'><i class="bi bi-house-door-fill"></i> <span>Quản lý phòng trọ</span></a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="user_manage.php" class='sidebar-link'><i class="bi bi-people-fill"></i> <span>Quản lý tin đăng</span></a>
+                            <a href="component-card.php" class='sidebar-link'><i class="bi bi-file-earmark-text-fill"></i> <span>Quản lý tin đăng</span></a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="account-profile.php" class='sidebar-link'><i class="bi bi-people-fill"></i> <span>Quản lý tài khoản</span></a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="ui-chart-apexcharts.php" class='sidebar-link'><i class="bi bi-bar-chart-fill"></i> <span>Thống kê</span></a>
                         </li>
                         <li class="sidebar-item">
                             <a href="../logout.php" class='sidebar-link'><i class="bi bi-box-arrow-right"></i> <span>Đăng xuất</span></a>
@@ -94,6 +104,23 @@ $total_views = $conn->query("SELECT SUM(count_view) as total FROM MOTEL")->fetch
                                     <div class="card-body px-4 py-4-5">
                                         <h6 class="text-muted font-semibold">Lượt xem</h6>
                                         <h6 class="font-extrabold mb-0"><?php echo number_format($total_views); ?></h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php
+                        $year_now = (int) date('Y');
+                        $month_now = (int) date('n');
+                        $posts_this_month = $conn->query("SELECT COUNT(*) AS c FROM motel WHERE YEAR(created_at)=$year_now AND MONTH(created_at)=$month_now")->fetch_assoc()['c'];
+                        ?>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="text-muted">Tin đăng tháng <?php echo $month_now; ?>/<?php echo $year_now; ?></h6>
+                                        <h3 class="font-extrabold mb-0"><?php echo (int) $posts_this_month; ?></h3>
+                                        <a href="ui-chart-apexcharts.php" class="small">Xem biểu đồ theo tháng →</a>
                                     </div>
                                 </div>
                             </div>
