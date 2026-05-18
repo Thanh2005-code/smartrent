@@ -26,7 +26,7 @@ if (isset($_POST['btn_login'])) {
     }
 
     if ($error === '') {
-        $stmt = $conn->prepare('SELECT ID, Name, Role, Avatar FROM user WHERE Username = ? AND Password = ?');
+        $stmt = $conn->prepare('SELECT ID, Name, Email, Role, Avatar FROM user WHERE Username = ? AND Password = ?');
         if ($stmt) {
             $stmt->bind_param('ss', $username, $password_md5);
             $stmt->execute();

@@ -168,6 +168,52 @@ ALTER TABLE `motel`
   ADD CONSTRAINT `motel_ibfk_2` FOREIGN KEY (`district_id`) REFERENCES `districts` (`ID`);
 COMMIT;
 
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `contacts`
+--
+
+CREATE TABLE `contacts` (
+  `ID` int(10) NOT NULL,
+  `fullname` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `message` text NOT NULL,
+  `user_id` int(10) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `contacts`
+--
+
+INSERT INTO `contacts` (`ID`, `fullname`, `email`, `phone`, `subject`, `message`, `user_id`, `created_at`) VALUES
+(1, 'Trần Thị Ánh', 'anh@gmail.com', '0912345678', 'Hỏi về phòng trọ Bạch Liêu', 'Phòng trọ khép kín gần ĐH Vinh (ID: 1) còn trống không ạ? Mình muốn qua xem phòng vào chiều mai.', 2, '2026-05-16 02:10:00'),
+(2, 'Nguyễn Văn Khách', 'khach@gmail.com', '0909090909', 'Yêu cầu hỗ trợ tài khoản', 'Tài khoản của mình không đăng được bài viết mới, hệ thống cứ báo lỗi duyệt. Nhờ admin kiểm tra lại.', 5, '2026-05-16 04:15:30'),
+(3, 'Lê Văn Nam', 'namle99@gmail.com', '0988223344', 'Hợp tác cho thuê', 'Tôi có một tòa nhà chung cư mini 10 phòng ở khu vực Phường Hưng Dũng muốn đăng bài số lượng lớn, bên mình có gói ưu đãi nào không?', NULL, '2026-05-16 08:20:15');
+
+--
+-- Chỉ mục cho bảng `contacts`
+--
+ALTER TABLE `contacts`
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- AUTO_INCREMENT cho bảng `contacts`
+--
+ALTER TABLE `contacts`
+  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- Các ràng buộc cho bảng `contacts`
+--
+ALTER TABLE `contacts`
+  ADD CONSTRAINT `contacts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
