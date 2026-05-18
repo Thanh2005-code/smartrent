@@ -12,6 +12,80 @@ $error = '';
 $success = '';
 
 $uid = (int) $_SESSION['user_id'];
+
+// ==========================================
+// 1. XỬ LÝ CẬP NHẬT THÔNG TIN TÀI KHOẢN
+// ==========================================
+if (isset($_POST['btn_update_info'])) {
+    $name = trim((string)$_POST['name']);
+    $email = trim((string)$_POST['email']);
+    $phone = trim((string)$_POST['phone']);
+
+    if ($name === '' || $email === '') {
+        $error = 'Họ tên và Email không được để trống.';
+    } else {
+        $upd_info = $conn->prepare('UPDATE user SET Name = ?, Email = ?, Phone = ? WHERE ID = ?');
+        if ($upd_info) {
+            $upd_info->bind_param('sssi', $name, $email, $phone, $uid);
+            if ($upd_info->execute()) {
+                $success = 'Cập nhật thông tin tài khoản thành công.';
+                $_SESSION['fullname'] = $name; // Cập nhật tên hiển thị trên thanh điều hướng
+            } else {
+                $error = 'Có lỗi xảy ra khi cập nhật thông tin.';
+            }
+            $upd_info->close();
+        }
+    }
+}
+
+// ==========================================
+// 2. XỬ LÝ ĐỔI MẬT KHẨU TÀI KHOẢN
+// ==========================================
+if (isset($_POST['btn_change_pass'])) {
+    $old_pass = $_POST['old_password'];
+    $new_pass = $_POST['new_password'];
+    $confirm_pass = $_POST['confirm_password'];
+
+    if ($old_pass === '' || $new_pass === '' || $confirm_pass === '') {
+        $error = 'Vui lòng điền đầy đủ các trường mật khẩu.';
+    } elseif ($new_pass !== $confirm_pass) {
+        $error = 'Mật khẩu mới và xác nhận mật khẩu không trùng khớp.';
+    } else {
+        // Lấy mật khẩu hiện tại trong DB để đối chiếu
+        $stmt_pass = $conn->prepare('SELECT Password FROM user WHERE ID = ? LIMIT 1');
+        if ($stmt_pass) {
+            $stmt_pass->bind_param('i', $uid);
+            $stmt_pass->execute();
+            $res_pass = $stmt_pass->get_result();
+            $user_pass = $res_pass->fetch_assoc();
+            $stmt_pass->close();
+
+            if ($user_pass) {
+                // Mã hóa MD5 mật khẩu cũ nhập vào để so sánh
+                if (md5($old_pass) !== $user_pass['Password']) {
+                    $error = 'Mật khẩu cũ không chính xác.';
+                } else {
+                    // Mã hóa MD5 mật khẩu mới trước khi lưu
+                    $new_pass_md5 = md5($new_pass);
+                    $upd_pass = $conn->prepare('UPDATE user SET Password = ? WHERE ID = ?');
+                    if ($upd_pass) {
+                        $upd_pass->bind_param('si', $new_pass_md5, $uid);
+                        if ($upd_pass->execute()) {
+                            $success = 'Đổi mật khẩu thành công.';
+                        } else {
+                            $error = 'Có lỗi xảy ra khi đổi mật khẩu.';
+                        }
+                        $upd_pass->close();
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ==========================================
+// 3. XỬ LÝ TẢI ẢNH ĐẠI DIỆN (GIỮ NGUYÊN GỐC)
+// ==========================================
 $stmt = $conn->prepare('SELECT Name, Username, Email, Phone, Avatar FROM user WHERE ID = ? LIMIT 1');
 $user = null;
 if ($stmt) {
@@ -39,9 +113,8 @@ if (isset($_POST['btn_avatar'])) {
         $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime = $finfo ? finfo_file($finfo, $_FILES['avatar']['tmp_name']) : '';
-        if ($finfo) {
-            finfo_close($finfo);
-        }
+        if ($finfo) { finfo_close($finfo); }
+        
         if (!isset($allowed[$mime])) {
             $error = 'Chỉ cho phép ảnh JPG, PNG, WEBP hoặc GIF.';
         } elseif ($_FILES['avatar']['size'] > 2 * 1024 * 1024) {
@@ -63,9 +136,7 @@ if (isset($_POST['btn_avatar'])) {
                             $oldRel = 'uploads/avatars/' . $oldRel;
                         }
                         $oldPath = __DIR__ . '/' . $oldRel;
-                        if (is_file($oldPath)) {
-                            @unlink($oldPath);
-                        }
+                        if (is_file($oldPath)) { @unlink($oldPath); }
                     }
 
                     $upd = $conn->prepare('UPDATE user SET Avatar = ? WHERE ID = ?');
@@ -125,6 +196,27 @@ if (isset($_POST['btn_avatar'])) {
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.06);
             margin-bottom: 3rem;
         }
+        .form-group-custom {
+            margin-bottom: 1.25rem;
+        }
+        .form-group-custom label {
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+            color: #333;
+        }
+        .btn-custom-submit {
+            background-color: #f35525;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .btn-custom-submit:hover {
+            background-color: #e24416;
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -156,72 +248,3 @@ if (isset($_POST['btn_avatar'])) {
                         <li><a href="logout.php" style="background-color:#f35525;color:#fff;border-radius:25px;padding:8px 20px !important;">Đăng xuất</a></li>
                     </ul>
                     <a class="menu-trigger"><span>Menu</span></a>
-                </nav>
-            </div>
-        </div>
-    </div>
-</header>
-
-<div class="page-heading header-text">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <h3>Hồ sơ tài khoản</h3>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="section">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="profile-card">
-                    <div class="text-center mb-4">
-                        <?php if ($avatar_href !== ''): ?>
-                            <img class="avatar-preview" src="<?php echo htmlspecialchars($avatar_href); ?>" alt="Avatar"
-                                 onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">
-                            <div class="avatar-placeholder" style="display:none;"><i class="fa fa-user"></i></div>
-                        <?php else: ?>
-                            <div class="avatar-placeholder"><i class="fa fa-user"></i></div>
-                        <?php endif; ?>
-                    </div>
-
-                    <?php if ($error !== ''): ?>
-                        <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
-                    <?php endif; ?>
-                    <?php if ($success !== ''): ?>
-                        <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
-                    <?php endif; ?>
-
-                    <h5 class="mb-3">Thông tin</h5>
-                    <p><strong>Họ tên:</strong> <?php echo htmlspecialchars($user['Name']); ?></p>
-                    <p><strong>Tên đăng nhập:</strong> <?php echo htmlspecialchars($user['Username']); ?></p>
-                    <p><strong>Email:</strong> <?php echo htmlspecialchars($user['Email']); ?></p>
-                    <p><strong>Điện thoại:</strong> <?php echo htmlspecialchars($user['Phone'] ?? ''); ?></p>
-
-                    <hr class="my-4">
-                    <h5 class="mb-3">Ảnh đại diện</h5>
-                    <p class="text-muted small">JPG, PNG, WEBP hoặc GIF, tối đa 2MB. </p>
-                    <form method="POST" action="" enctype="multipart/form-data" class="mt-3">
-                        <div class="mb-3">
-                            <input type="file" name="avatar" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif" required>
-                        </div>
-                        <button type="submit" name="btn_avatar" class="btn btn-primary">Tải ảnh lên</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<footer style="margin-top:80px;">
-    <div class="container text-center py-4 text-muted"><p>© Smartrent</p></div>
-</footer>
-
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
-<script src="assets/js/isotope.min.js"></script>
-<script src="assets/js/custom.js"></script>
-</body>
-</html>
