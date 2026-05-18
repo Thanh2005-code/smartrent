@@ -79,7 +79,7 @@ function smartrent_approve_label($approve)
     return ['Chờ duyệt', 'bg-warning'];
 }
 
-function smartrent_build_motel_search($district = '', $price = '', $utility = '')
+function smartrent_build_motel_search($district = '', $price = '', $area = '', $utility = '') 
 {
     $where = ['motel.approve = 1'];
     $types = '';
@@ -97,6 +97,16 @@ function smartrent_build_motel_search($district = '', $price = '', $utility = ''
         $where[] = 'motel.price >= 1500000 AND motel.price <= 3000000';
     } elseif ($price === '3') {
         $where[] = 'motel.price > 3000000';
+    }
+
+    if ($area !== '') {
+        if ($area === '1') {
+            $where[] = " motel.area < 20";
+        } elseif ($area === '2') {
+            $where[] = " motel.area BETWEEN 20 AND 30";
+        } elseif ($area === '3') {
+           $where[] = " motel.area > 30";
+        }
     }
 
     if ($utility === 'wifi') {

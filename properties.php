@@ -3,17 +3,42 @@ session_start();
 require_once __DIR__ . '/includes/helpers.php';
 include 'connect.php';
 
+// Lấy các biến từ thanh tìm kiếm
 $district = isset($_GET['district']) ? trim((string) $_GET['district']) : '';
 $price = isset($_GET['price']) ? trim((string) $_GET['price']) : '';
+$area = isset($_GET['area']) ? trim((string) $_GET['area']) : '';
 $utility = isset($_GET['utility']) ? trim((string) $_GET['utility']) : '';
-$search = smartrent_build_motel_search($district, $price, $utility);
+$search = smartrent_build_motel_search($district, $price, $area, $utility);
 
+// --- 1. XỬ LÝ LOGIC PHÂN TRANG ---
+$limit = 3; 
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1; 
+$offset = ($page - 1) * $limit;
+
+// Đếm tổng số lượng phòng thỏa mãn điều kiện
+$sql_count = "SELECT COUNT(motel.ID) as total_records 
+              FROM motel 
+              JOIN districts ON motel.district_id = districts.ID 
+              JOIN user ON motel.user_id = user.ID 
+              WHERE " . $search['sql'];
+$stmt_count = $conn->prepare($sql_count);
+if ($search['types'] !== '') {
+    $stmt_count->bind_param($search['types'], ...$search['params']);
+}
+$stmt_count->execute();
+$count_result = $stmt_count->get_result()->fetch_assoc();
+$total_records = $count_result['total_records'];
+$total_pages = ceil($total_records / $limit);
+
+// --- 2. TRUY VẤN LẤY DỮ LIỆU CÓ LIMIT ---
 $sql = "SELECT motel.*, districts.Name AS district_name, user.Name AS owner_name
         FROM motel
         JOIN districts ON motel.district_id = districts.ID
         JOIN user ON motel.user_id = user.ID
         WHERE " . $search['sql'] . "
-        ORDER BY motel.created_at DESC";
+        ORDER BY motel.created_at DESC 
+        LIMIT $offset, $limit";
 $stmt = $conn->prepare($sql);
 if ($search['types'] !== '') {
     $stmt->bind_param($search['types'], ...$search['params']);
@@ -25,15 +50,11 @@ $list_res = $stmt->get_result();
 <html lang="vi">
 
   <head>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
     <title>Smartrent - Danh sách phòng trọ</title>
-
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="assets/css/fontawesome.css">
     <link rel="stylesheet" href="assets/css/templatemo-villa-agency.css">
     <link rel="stylesheet" href="assets/css/owl.css">
@@ -42,17 +63,6 @@ $list_res = $stmt->get_result();
   </head>
 
 <body>
-
-  <div id="js-preloader" class="js-preloader">
-    <div class="preloader-inner">
-      <span class="dot"></span>
-      <div class="dots">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-    </div>
-  </div>
   <div class="sub-header">
     <div class="container">
       <div class="row">
@@ -85,7 +95,14 @@ $list_res = $stmt->get_result();
                       <li><a href="properties.php" class="active">Phòng trọ</a></li>
                       <li><a href="contact.php">Liên hệ</a></li>
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <li><a href="profile.php"><i class="fa fa-user"></i> <?php echo htmlspecialchars($_SESSION['fullname']); ?></a></li>
+                        <?php
+                        $nav_avatar = isset($_SESSION['avatar']) && $_SESSION['avatar'] !== '' ? smartrent_avatar_url($_SESSION['avatar']) : '';
+                        ?>
+                        <li><a href="profile.php"><?php if ($nav_avatar !== ''): ?>
+                            <img src="<?php echo htmlspecialchars($nav_avatar); ?>" alt="" class="navbar-avatar">
+                        <?php else: ?>
+                            <i class="fa fa-user"></i>
+                        <?php endif; ?> <?php echo htmlspecialchars($_SESSION['fullname']); ?></a></li>
                         <li><a href="logout.php" style="background-color: #f35525; color: #fff; border-radius: 25px; padding: 8px 20px !important;">Đăng xuất</a></li>
                     <?php else: ?>
                         <li><a href="login.php"><i class="fa fa-sign-in-alt"></i> Đăng nhập</a></li>
@@ -113,19 +130,12 @@ $list_res = $stmt->get_result();
   <div class="section properties">
     <div class="container">
       <ul class="properties-filter">
-        <li>
-          <a class="is_active" href="#!" data-filter="*">Tất cả</a>
-        </li>
-        <li>
-          <a href="#!" data-filter=".adv">Phòng khép kín</a>
-        </li>
-        <li>
-          <a href="#!" data-filter=".str">Nhà nguyên căn</a>
-        </li>
-        <li>
-          <a href="#!" data-filter=".rac">Chung cư mini</a>
-        </li>
+        <li><a class="is_active" href="#!" data-filter="*">Tất cả</a></li>
+        <li><a href="#!" data-filter=".adv">Phòng khép kín</a></li>
+        <li><a href="#!" data-filter=".str">Nhà nguyên căn</a></li>
+        <li><a href="#!" data-filter=".rac">Chung cư mini</a></li>
       </ul>
+      
       <div class="row properties-box">
         <?php if ($list_res->num_rows === 0): ?>
         <div class="col-lg-12">
@@ -157,6 +167,35 @@ $list_res = $stmt->get_result();
         <?php endwhile; ?>
         <?php endif; ?>
       </div>
+
+    <?php if ($total_pages > 1): ?>
+<div class="row mt-5">
+    <div class="col-lg-12">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                
+                <li class="page-item <?php if($page <= 1) echo 'disabled'; ?>">
+                    <a class="page-link" href="?page=<?php echo $page - 1; ?>">Trước</a>
+                </li>
+
+                <?php for($i = 1; $i <= $total_pages; $i++): ?>
+                    <li class="page-item <?php if($page == $i) echo 'active'; ?>" style="margin: 0 5px;">
+                        <a class="page-link" href="?page=<?php echo $i; ?>" <?php if($page == $i) echo 'style="background-color: #f35525; border-color: #f35525; color: white;"'; ?>>
+                            <?php echo $i; ?>
+                        </a>
+                    </li>
+                <?php endfor; ?>
+
+                <li class="page-item <?php if($page >= $total_pages) echo 'disabled'; ?>">
+                    <a class="page-link" href="?page=<?php echo $page + 1; ?>">Sau</a>
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+<?php endif; ?>
+      
     </div>
   </div>
 
@@ -164,7 +203,7 @@ $list_res = $stmt->get_result();
     <div class="container">
       <div class="col-lg-12">
         <p>Copyright © 2026 Smartrent. Thiết kế bám sát Case Study ĐH Vinh. 
-        <br><i>"Chủ trọ nhàn tay phòng đầy mỗi ngày"</i></p>
+        <br><i>"Chủ trọ nhàn tay - Phòng đầy mỗi ngày"</i></p>
       </div>
     </div>
   </footer>

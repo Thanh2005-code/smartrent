@@ -49,17 +49,6 @@ include 'connect.php';
 </head>
 
 <body>
-  <div id="js-preloader" class="js-preloader">
-    <div class="preloader-inner">
-      <span class="dot"></span>
-      <div class="dots">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-    </div>
-  </div>
-
   <div class="sub-header">
     <div class="container">
       <div class="row">
@@ -132,22 +121,24 @@ include 'connect.php';
   <div class="container">
     <div class="search-form">
         <form action="properties.php" method="GET" class="row g-3">
+            
             <div class="col-md-3">
                 <select name="district" class="form-select">
-    <option value="">Địa điểm (Quận/Huyện)</option>
-    <?php
-    $sel_district = isset($_GET['district']) ? (string) $_GET['district'] : '';
-    $dist_res = $conn->query('SELECT * FROM districts');
-    if ($dist_res) {
-        while ($d = $dist_res->fetch_assoc()) {
-            $selected = $sel_district === (string) $d['ID'] ? ' selected' : '';
-            echo '<option value="' . (int) $d['ID'] . '"' . $selected . '>' . htmlspecialchars($d['Name']) . '</option>';
-        }
-    }
-    ?>
-</select>
+                    <option value="">Địa điểm (Quận/Huyện)</option>
+                    <?php
+                    $sel_district = isset($_GET['district']) ? (string) $_GET['district'] : '';
+                    $dist_res = $conn->query('SELECT * FROM districts');
+                    if ($dist_res) {
+                        while ($d = $dist_res->fetch_assoc()) {
+                            $selected = $sel_district === (string) $d['ID'] ? ' selected' : '';
+                            echo '<option value="' . (int) $d['ID'] . '"' . $selected . '>' . htmlspecialchars($d['Name']) . '</option>';
+                        }
+                    }
+                    ?>
+                </select>
             </div>
-            <div class="col-md-3">
+            
+            <div class="col-md-2">
                 <select name="price" class="form-select">
                     <?php $sel_price = isset($_GET['price']) ? (string) $_GET['price'] : ''; ?>
                     <option value=""<?php echo $sel_price === '' ? ' selected' : ''; ?>>Khoảng giá</option>
@@ -156,21 +147,46 @@ include 'connect.php';
                     <option value="3"<?php echo $sel_price === '3' ? ' selected' : ''; ?>>Trên 3 triệu</option>
                 </select>
             </div>
-            <div class="col-md-3">
+
+            <div class="col-md-2">
+                <select name="area" class="form-select">
+                    <?php $sel_area = isset($_GET['area']) ? (string) $_GET['area'] : ''; ?>
+                    <option value=""<?php echo $sel_area === '' ? ' selected' : ''; ?>>Diện tích</option>
+                    <option value="1"<?php echo $sel_area === '1' ? ' selected' : ''; ?>>Dưới 20m2</option>
+                    <option value="2"<?php echo $sel_area === '2' ? ' selected' : ''; ?>>20 - 30m2</option>
+                    <option value="3"<?php echo $sel_area === '3' ? ' selected' : ''; ?>>Trên 30m2</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
                 <select name="utility" class="form-select">
                     <?php $sel_utility = isset($_GET['utility']) ? (string) $_GET['utility'] : ''; ?>
-                    <option value=""<?php echo $sel_utility === '' ? ' selected' : ''; ?>>Tiện ích kèm theo</option>
+                    <option value=""<?php echo $sel_utility === '' ? ' selected' : ''; ?>>Tiện ích</option>
                     <option value="wifi"<?php echo $sel_utility === 'wifi' ? ' selected' : ''; ?>>Có Wifi</option>
-                    <option value="ac"<?php echo $sel_utility === 'ac' ? ' selected' : ''; ?>>Có Điều hòa</option>
+                    <option value="ac"<?php echo $sel_utility === 'ac' ? ' selected' : ''; ?>>Điều hòa</option>
                     <option value="parking"<?php echo $sel_utility === 'parking' ? ' selected' : ''; ?>>Chỗ để xe</option>
                 </select>
             </div>
+
             <div class="col-md-3">
                 <button type="submit" class="btn btn-dark w-100">TÌM PHÒNG NGAY</button>
             </div>
+            
         </form>
     </div>
   </div>
+
+  <?php
+
+  $limit = 3; 
+  $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+  if ($page < 1) $page = 1;
+  $offset = ($page - 1) * $limit;
+
+  $count_res = $conn->query("SELECT COUNT(*) as total FROM motel WHERE approve = 1");
+  $total_records = $count_res->fetch_assoc()['total'];
+  $total_pages = ceil($total_records / $limit);
+  ?>
 
   <div class="section best-deal">
     <div class="container">
@@ -195,7 +211,7 @@ include 'connect.php';
                         JOIN user ON motel.user_id = user.ID 
                         WHERE motel.approve = 1 
                         ORDER BY motel.created_at DESC 
-                        LIMIT 6";
+                        LIMIT $offset, $limit";
             $res_new = $conn->query($sql_new);
             while($row = $res_new->fetch_assoc()) { render_motel_item($row); }
             ?>
@@ -210,7 +226,7 @@ include 'connect.php';
                          JOIN user ON motel.user_id = user.ID 
                          WHERE motel.approve = 1 
                          ORDER BY motel.count_view DESC 
-                         LIMIT 6";
+                         LIMIT $offset, $limit";
             $res_view = $conn->query($sql_view);
             while($row = $res_view->fetch_assoc()) { render_motel_item($row); }
             ?>
@@ -230,13 +246,41 @@ include 'connect.php';
                          JOIN user ON motel.user_id = user.ID 
                          WHERE motel.approve = 1 
                          ORDER BY near_priority ASC, motel.count_view DESC 
-                         LIMIT 6";
+                         LIMIT $offset, $limit";
             $res_vinh = $conn->query($sql_vinh);
             while($row = $res_vinh->fetch_assoc()) { render_motel_item($row); }
             ?>
         </div>
     </div>
 </div>
+
+<?php if ($total_pages > 1): ?>
+<div class="row mt-5">
+    <div class="col-lg-12">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                
+                <li class="page-item <?php if($page <= 1) echo 'disabled'; ?>">
+                    <a class="page-link" href="?page=<?php echo $page - 1; ?>">Trước</a>
+                </li>
+
+                <?php for($i = 1; $i <= $total_pages; $i++): ?>
+                    <li class="page-item <?php if($page == $i) echo 'active'; ?>" style="margin: 0 5px;">
+                        <a class="page-link" href="?page=<?php echo $i; ?>" <?php if($page == $i) echo 'style="background-color: #f35525; border-color: #f35525; color: white;"'; ?>>
+                            <?php echo $i; ?>
+                        </a>
+                    </li>
+                <?php endfor; ?>
+
+                <li class="page-item <?php if($page >= $total_pages) echo 'disabled'; ?>">
+                    <a class="page-link" href="?page=<?php echo $page + 1; ?>">Sau</a>
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php
 function render_motel_item($row) {
@@ -318,7 +362,7 @@ function render_motel_item($row) {
     <div class="container">
       <div class="col-lg-12">
         <p>Copyright © 2026 Smartrent. Thiết kế bám sát Case Study ĐH Vinh. 
-        <br><i>"Chủ trọ nhàn tay phòng đầy mỗi ngày"</i></p>
+        <br><i>"Chủ trọ nhàn tay - Phòng đầy mỗi ngày"</i></p>
       </div>
     </div>
   </footer>
