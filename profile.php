@@ -14,6 +14,24 @@ $success = '';
 $uid = (int) $_SESSION['user_id'];
 
 // ==========================================
+// BỔ SUNG: XỬ LÝ CHỦ TRỌ BÁO CÁO ĐÃ THUÊ
+// ==========================================
+if (isset($_POST['btn_mark_rented'])) {
+    $motel_id = (int)$_POST['motel_id'];
+    // Bảo mật: Chỉ được cập nhật trạng thái phòng thuộc sở hữu của chính mình
+    $stmt_rent = $conn->prepare('UPDATE motel SET status = 1 WHERE ID = ? AND user_id = ?');
+    if ($stmt_rent) {
+        $stmt_rent->bind_param('ii', $motel_id, $uid);
+        if ($stmt_rent->execute()) {
+            $success = 'Đã gửi báo cáo: Cập nhật trạng thái phòng thành ĐÃ THUÊ thành công!';
+        } else {
+            $error = 'Có lỗi xảy ra khi cập nhật trạng thái phòng.';
+        }
+        $stmt_rent->close();
+    }
+}
+
+// ==========================================
 // 1. XỬ LÝ CẬP NHẬT THÔNG TIN TÀI KHOẢN
 // ==========================================
 if (isset($_POST['btn_update_info'])) {
@@ -29,7 +47,7 @@ if (isset($_POST['btn_update_info'])) {
             $upd_info->bind_param('sssi', $name, $email, $phone, $uid);
             if ($upd_info->execute()) {
                 $success = 'Cập nhật thông tin tài khoản thành công.';
-                $_SESSION['fullname'] = $name; // Cập nhật tên hiển thị trên thanh điều hướng
+                $_SESSION['fullname'] = $name; 
             } else {
                 $error = 'Có lỗi xảy ra khi cập nhật thông tin.';
             }
@@ -51,7 +69,6 @@ if (isset($_POST['btn_change_pass'])) {
     } elseif ($new_pass !== $confirm_pass) {
         $error = 'Mật khẩu mới và xác nhận mật khẩu không trùng khớp.';
     } else {
-        // Lấy mật khẩu hiện tại trong DB để đối chiếu
         $stmt_pass = $conn->prepare('SELECT Password FROM user WHERE ID = ? LIMIT 1');
         if ($stmt_pass) {
             $stmt_pass->bind_param('i', $uid);
@@ -61,11 +78,9 @@ if (isset($_POST['btn_change_pass'])) {
             $stmt_pass->close();
 
             if ($user_pass) {
-                // Mã hóa MD5 mật khẩu cũ nhập vào để so sánh
                 if (md5($old_pass) !== $user_pass['Password']) {
                     $error = 'Mật khẩu cũ không chính xác.';
                 } else {
-                    // Mã hóa MD5 mật khẩu mới trước khi lưu
                     $new_pass_md5 = md5($new_pass);
                     $upd_pass = $conn->prepare('UPDATE user SET Password = ? WHERE ID = ?');
                     if ($upd_pass) {
@@ -84,7 +99,7 @@ if (isset($_POST['btn_change_pass'])) {
 }
 
 // ==========================================
-// 3. XỬ LÝ TẢI ẢNH ĐẠI DIỆN (GIỮ NGUYÊN GỐC)
+// 3. XỬ LÝ TẢI ẢNH ĐẠI DIỆN
 // ==========================================
 $stmt = $conn->prepare('SELECT Name, Username, Email, Phone, Avatar FROM user WHERE ID = ? LIMIT 1');
 $user = null;
@@ -157,6 +172,23 @@ if (isset($_POST['btn_avatar'])) {
         }
     }
 }
+
+// Lấy danh sách phòng trọ do chính user này đăng để hiển thị ở Tab Quản lý tin
+$my_motels = [];
+$stmt_my_list = $conn->prepare("SELECT motel.*, districts.Name as district_name 
+                                FROM motel 
+                                JOIN districts ON motel.district_id = districts.ID 
+                                WHERE motel.user_id = ? 
+                                ORDER BY motel.created_at DESC");
+if ($stmt_my_list) {
+    $stmt_my_list->bind_param('i', $uid);
+    $stmt_my_list->execute();
+    $res_my_list = $stmt_my_list->get_result();
+    while ($row = $res_my_list->fetch_assoc()) {
+        $my_motels[] = $row;
+    }
+    $stmt_my_list->close();
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -217,6 +249,17 @@ if (isset($_POST['btn_avatar'])) {
             background-color: #e24416;
             color: #fff;
         }
+        .nav-tabs-custom .nav-link {
+            color: #333;
+            font-weight: 500;
+            border: none;
+            padding: 12px 20px;
+        }
+        .nav-tabs-custom .nav-link.active {
+            color: #f35525;
+            border-bottom: 3px solid #f35525;
+            background: none;
+        }
     </style>
 </head>
 
@@ -248,3 +291,202 @@ if (isset($_POST['btn_avatar'])) {
                         <li><a href="logout.php" style="background-color:#f35525;color:#fff;border-radius:25px;padding:8px 20px !important;">Đăng xuất</a></li>
                     </ul>
                     <a class="menu-trigger"><span>Menu</span></a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="page-heading header-text">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Quản lý tài khoản cá nhân</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <?php if ($error !== ''): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+    <?php if ($success !== ''): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <ul class="nav nav-tabs nav-tabs-custom mb-4" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-pane" type="button" role="tab">Thông tin tài khoản</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="motel-tab" data-bs-toggle="tab" data-bs-target="#motel-pane" type="button" role="tab">Tin đăng của tôi (<?php echo count($my_motels); ?>)</button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="info-pane" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-4 text-center mb-4">
+                    <div class="profile-card">
+                        <form action="profile.php" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <?php if ($avatar_href !== ''): ?>
+                                    <img src="<?php echo htmlspecialchars($avatar_href); ?>" class="avatar-preview" alt="Avatar">
+                                <?php else: ?>
+                                    <div class="avatar-placeholder"><i class="fa fa-user"></i></div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="mb-3 text-start">
+                                <label class="form-label font-weight-bold">Thay đổi ảnh đại diện</label>
+                                <input class="form-control" type="file" name="avatar" accept="image/*">
+                            </div>
+                            <button type="submit" name="btn_avatar" class="btn btn-custom-submit w-100">Tải ảnh lên</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="profile-card">
+                        <h4 class="mb-4">Cập nhật thông tin cá nhân</h4>
+                        <form action="profile.php" method="POST">
+                            <div class="form-group-custom">
+                                <label>Tên đăng nhập (Không thể sửa)</label>
+                                <input type="text" class="form-control" value="<?php echo htmlspecialchars($user['Username']); ?>" disabled>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Họ và tên</label>
+                                <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($user['Name']); ?>" required>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Địa chỉ Email</label>
+                                <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($user['Email']); ?>" required>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Số điện thoại</label>
+                                <input type="text" name="phone" class="form-control" value="<?php echo htmlspecialchars($user['Phone']); ?>">
+                            </div>
+                            <button type="submit" name="btn_update_info" class="btn btn-custom-submit mt-2">Lưu thay đổi</button>
+                        </form>
+                    </div>
+
+                    <div class="profile-card">
+                        <h4 class="mb-4">Đổi mật khẩu tài khoản</h4>
+                        <form action="profile.php" method="POST">
+                            <div class="form-group-custom">
+                                <label>Mật khẩu hiện tại</label>
+                                <input type="password" name="old_password" class="form-control" required>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Mật khẩu mới</label>
+                                <input type="password" name="new_password" class="form-control" required>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Xác nhận mật khẩu mới</label>
+                                <input type="password" name="confirm_password" class="form-control" required>
+                            </div>
+                            <button type="submit" name="btn_change_pass" class="btn btn-custom-submit mt-2">Đổi mật khẩu</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="motel-pane" role="tabpanel">
+            <div class="profile-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>Danh sách phòng trọ bạn đã đăng</h4>
+                    <a href="add-property.php" class="btn btn-success rounded-pill px-4"><i class="fa fa-plus"></i> Đăng phòng mới</a>
+                </div>
+
+                <?php if (count($my_motels) === 0): ?>
+                    <p class="text-center text-muted py-4">Bạn chưa đăng bài phòng trọ nào lên hệ thống.</p>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle border">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Hình ảnh</th>
+                                    <th>Tiêu đề bài đăng</th>
+                                    <th>Khu vực</th>
+                                    <th>Giá phòng</th>
+                                    <th>Trạng thái duyệt</th>
+                                    <th>Tình trạng phòng</th>
+                                    <th class="text-center">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($my_motels as $motel): 
+                                    $img = !empty($motel['images']) ? 'assets/images/' . $motel['images'] : 'assets/images/property-01.jpg';
+                                    $is_rented = isset($motel['status']) && (int)$motel['status'] === 1;
+                                ?>
+                                    <tr>
+                                        <td>
+                                            <img src="<?php echo htmlspecialchars($img); ?>" style="width:70px; height:50px; object-fit:cover; border-radius:5px;">
+                                        </td>
+                                        <td>
+                                            <a href="property-details.php?id=<?php echo $motel['ID']; ?>" target="_blank" class="text-dark font-weight-bold"><?php echo htmlspecialchars($motel['title']); ?></a>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($motel['district_name']); ?></td>
+                                        <td class="text-danger font-weight-bold"><?php echo number_format($motel['price'], 0, ',', '.'); ?>đ</td>
+                                        <td>
+                                            <?php if ((int)$motel['approve'] === 1): ?>
+                                                <span class="badge bg-success">Đã duyệt</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($is_rented): ?>
+                                                <span class="badge bg-secondary">Đã cho thuê</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-primary">Còn trống</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <?php if (!$is_rented): ?>
+                                                    <form action="profile.php" method="POST" onsubmit="return confirm('Xác nhận đánh dấu phòng này ĐÃ THUÊ?');">
+                                                        <input type="hidden" name="motel_id" value="<?php echo $motel['ID']; ?>">
+                                                        <button type="submit" name="btn_mark_rented" class="btn btn-sm btn-outline-danger" title="Báo cáo đã thuê"><i class="fa fa-home"></i> Đã thuê</button>
+                                                    </form>
+                                                <?php endif; ?>
+                                                
+                                                <a href="edit-property.php?id=<?php echo $motel['ID']; ?>" class="btn btn-sm btn-outline-primary" title="Sửa tin"><i class="fa fa-edit"></i></a>
+                                                <a href="delete-property.php?id=<?php echo $motel['ID']; ?>" class="btn btn-sm btn-outline-secondary" onclick="return confirm('Bạn có chắc chắn muốn xóa tin đăng này?')" title="Xóa tin"><i class="fa fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="col-lg-12">
+            <p>Copyright © 2026 Smartrent. Thiết kế bám sát Case Study ĐH Vinh. 
+            <br><i>"Chủ trọ nhàn tay - Phòng đầy mỗi ngày"</i></p>
+        </div>
+    </div>
+</footer>
+
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="assets/js/isotope.min.js"></script>
+  <script src="assets/js/owl-carousel.js"></script>
+  <script src="assets/js/counter.js"></script>
+  <script src="assets/js/custom.js"></script>
+</body>
+</html>

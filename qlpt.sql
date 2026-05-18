@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 15, 2026 lúc 07:38 PM
+-- Thời gian đã tạo: Th5 18, 2026 lúc 09:44 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -65,19 +65,21 @@ CREATE TABLE `motel` (
   `utilities` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `phone` varchar(255) DEFAULT NULL,
-  `approve` int(11) DEFAULT 0
+  `approve` int(11) DEFAULT 0,
+  `status` tinyint(4) DEFAULT 0 COMMENT '0: Con trong, 1: Da thue'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `motel`
 --
 
-INSERT INTO `motel` (`ID`, `title`, `description`, `price`, `area`, `count_view`, `address`, `lating`, `images`, `user_id`, `category_id`, `district_id`, `utilities`, `created_at`, `phone`, `approve`) VALUES
-(1, 'Phòng trọ khép kín gần ĐH Vinh', 'Phòng rộng rãi, an ninh tốt, cách cổng chính ĐH Vinh 200m.', 1500000, 20, 150, 'Số 10 Bạch Liêu', NULL, 'phong1.jpg', 1, 1, 1, 'Wifi, Điều hòa, Nóng lạnh', '2026-05-15 17:28:43', '0987654321', 1),
-(2, 'Chung cư mini cao cấp', 'Full nội thất, chỉ việc xách vali vào ở, giờ giấc tự do.', 3500000, 35, 300, 'Số 5 Nguyễn Du', NULL, 'phong2.jpg', 2, 2, 3, 'Giường, Tủ, Máy giặt, Điều hòa', '2026-05-15 17:28:43', '0912345678', 1),
-(3, 'Nhà nguyên căn hẻm ô tô', 'Thích hợp ở ghép nhóm 4-5 người, điện nước giá dân.', 5000000, 80, 50, 'Ngõ 20 Phượng Hoàng', NULL, 'phong3.jpg', 3, 3, 2, 'Bếp, Sân phơi, Chỗ để xe', '2026-05-15 17:28:43', '0933334444', 1),
-(4, 'Phòng trọ giá rẻ cho sinh viên', 'Khu trọ an ninh, chủ nhà thân thiện, không chung chủ.', 1200000, 15, 80, 'Số 8 Phong Đình Cảng', NULL, 'phong4.jpg', 1, 1, 4, 'Wifi, Giường cá nhân', '2026-05-15 17:28:43', '0987654321', 1),
-(5, 'Căn hộ Studio hiện đại', 'Mới xây, thiết kế hiện đại, view đẹp. Đang chờ Admin duyệt.', 2500000, 25, 20, 'Số 12 Lê Lợi', NULL, 'phong5.jpg', 4, 2, 5, 'Full đồ, Thang máy, Khóa vân tay', '2026-05-15 17:28:43', '0999888777', 0);
+INSERT INTO `motel` (`ID`, `title`, `description`, `price`, `area`, `count_view`, `address`, `lating`, `images`, `user_id`, `category_id`, `district_id`, `utilities`, `created_at`, `phone`, `approve`, `status`) VALUES
+(1, 'Phòng trọ khép kín gần ĐH Vinh', 'Phòng rộng rãi, an ninh tốt, cách cổng chính ĐH Vinh 200m.', 1500000, 20, 151, 'Số 10 Bạch Liêu', NULL, 'phong1.jpg', 1, 1, 1, 'Wifi, Điều hòa, Nóng lạnh', '2026-05-15 17:28:43', '0987654321', 1, 0),
+(2, 'Chung cư mini cao cấp', 'Full nội thất, chỉ việc xách vali vào ở, giờ giấc tự do.', 3500000, 35, 303, 'Số 5 Nguyễn Du', NULL, 'phong2.jpg', 2, 2, 3, 'Giường, Tủ, Máy giặt, Điều hòa', '2026-05-15 17:28:43', '0912345678', 1, 0),
+(3, 'Nhà nguyên căn hẻm ô tô', 'Thích hợp ở ghép nhóm 4-5 người, điện nước giá dân.', 5000000, 80, 51, 'Ngõ 20 Phượng Hoàng', NULL, 'phong3.jpg', 3, 3, 2, 'Bếp, Sân phơi, Chỗ để xe', '2026-05-15 17:28:43', '0933334444', 1, 0),
+(4, 'Phòng trọ giá rẻ cho sinh viên', 'Khu trọ an ninh, chủ nhà thân thiện, không chung chủ.', 1200000, 15, 82, 'Số 8 Phong Đình Cảng', NULL, 'phong4.jpg', 1, 1, 4, 'Wifi, Giường cá nhân', '2026-05-15 17:28:43', '0987654321', 1, 0),
+(5, 'Căn hộ Studio hiện đại', 'Mới xây, thiết kế hiện đại, view đẹp. Đang chờ Admin duyệt.', 2500000, 25, 20, 'Số 12 Lê Lợi', NULL, 'phong5.jpg', 4, 2, 5, 'Full đồ, Thang máy, Khóa vân tay', '2026-05-15 17:28:43', '0999888777', 0, 0),
+(6, 'Phòng khép kín đầy đủ tiện nghi', NULL, 2000000, 40, 0, NULL, NULL, 'room_1779130857_de9bec84.jpg', 6, 1, 3, 'Có Wifi, Điều hòa, Khép kín', '2026-05-18 19:00:57', NULL, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -101,11 +103,12 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`ID`, `Name`, `Username`, `Email`, `Password`, `Role`, `Phone`, `Avatar`) VALUES
-(1, 'Trần Thị Thanh', 'thanhadmin', 'thanh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 1, '0987654321', 'avatar_thanh.jpg'),
-(2, 'Trần Thị Ánh', 'anhuser', 'anh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0912345678', 'avatar_anh.jpg'),
+(1, 'Trần Thị Thanh', 'thanhadmin', 'thanh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 2, '0987654321', 'avatar_thanh.jpg'),
+(2, 'Trần Thị Ánh', 'anhuser', 'anh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0912345678', 'uploads/avatars/u2_260eb8c33be73a80.jpg'),
 (3, 'Trần Thị Thùy', 'thuyuser', 'thuy@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0933334444', 'avatar_thuy.jpg'),
 (4, 'Vương Đình Quang', 'quangvd', 'quangvd@vinhuni.edu.vn', 'e10adc3949ba59abbe56e057f20f883e', 1, '0999888777', 'avatar_quang.jpg'),
-(5, 'Nguyễn Văn Khách', 'khachthue', 'khach@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0909090909', 'avatar_khach.jpg');
+(5, 'Nguyễn Văn Khách', 'khachthue', 'khach@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0909090909', 'avatar_khach.jpg'),
+(6, 'Nguyễn Thị Thủy', 'thuy', 'thanhthuyyyyyy194@gmail.com', 'f0070dd5f8ee4fc57840867cf2bc0d80', 1, '0352516343', NULL);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -145,13 +148,13 @@ ALTER TABLE `districts`
 -- AUTO_INCREMENT cho bảng `motel`
 --
 ALTER TABLE `motel`
-  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `user`
 --
 ALTER TABLE `user`
-  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

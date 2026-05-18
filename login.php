@@ -34,16 +34,18 @@ if (isset($_POST['btn_login'])) {
 
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
-                $_SESSION['login_failures'] = 0;
+                $_SESSION['login_failures'] = 0; // Reset số lần sai khi đăng nhập đúng
 
                 $_SESSION['user_id'] = $row['ID'];
                 $_SESSION['fullname'] = $row['Name'];
-                $_SESSION['role'] = $row['Role'];
+                $_SESSION['role'] = (int)$row['Role']; // Lưu Role (0, 1 hoặc 2) vào Session
                 $_SESSION['avatar'] = $row['Avatar'] ?? '';
 
-                if ($row['Role'] == 1) {
+                // SỬA LUỒNG PHÂN QUYỀN: Chỉ Admin (Role = 2) mới được vào trang Quản trị
+                if ((int)$row['Role'] === 2) {
                     header('Location: admin/index.php');
                 } else {
+                    // Người thuê (Role = 0) và Chủ trọ (Role = 1) đều về Trang chủ
                     header('Location: index.php');
                 }
                 exit();
@@ -105,24 +107,24 @@ if (isset($_POST['btn_login'])) {
                         </div>
 
                         <?php if ($require_captcha): ?>
-<div class="mb-4">
-    <?php if (RECAPTCHA_SITE_KEY !== ''): ?>
-    <div class="g-recaptcha" 
-         data-sitekey="<?php echo htmlspecialchars(RECAPTCHA_SITE_KEY); ?>" 
-         data-expired-callback="onRecaptchaExpired"></div>
-    
-    <script>
-        function onRecaptchaExpired() {
-            if (typeof grecaptcha !== 'undefined') {
-                grecaptcha.reset();
-            }
-        }
-    </script>
-    <?php else: ?>
-    <div class="alert alert-warning">Chưa cấu hình RECAPTCHA_SITE_KEY trong config.php.</div>
-    <?php endif; ?>
-</div>
-<?php endif; ?>
+                        <div class="mb-4">
+                            <?php if (RECAPTCHA_SITE_KEY !== ''): ?>
+                            <div class="g-recaptcha" 
+                                 data-sitekey="<?php echo htmlspecialchars(RECAPTCHA_SITE_KEY); ?>" 
+                                 data-expired-callback="onRecaptchaExpired"></div>
+                            
+                            <script>
+                                function onRecaptchaExpired() {
+                                    if (typeof grecaptcha !== 'undefined') {
+                                        grecaptcha.reset();
+                                    }
+                                }
+                            </script>
+                            <?php else: ?>
+                            <div class="alert alert-warning">Chưa cấu hình RECAPTCHA_SITE_KEY trong config.php.</div>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
 
                         <div class="form-check form-check-lg d-flex align-items-end">
                             <input class="form-check-input me-2" type="checkbox" value="" id="flexCheckDefault">
@@ -135,7 +137,7 @@ if (isset($_POST['btn_login'])) {
 
                     <div class="text-center mt-5 text-lg fs-5">
                         <p class="text-gray-600">Chưa có tài khoản? <a href="register.php" class="font-bold">Đăng ký ngay</a>.</p>
-                        <p class="text-muted mt-3"><i>"Chủ trọ nhàn tay phòng đầy mỗi ngày"</i></p>
+                        <p class="text-muted mt-3"><i>"Chủ trọ nhàn tay - Phòng đầy mỗi ngày"</i></p>
                     </div>
                 </div>
             </div>

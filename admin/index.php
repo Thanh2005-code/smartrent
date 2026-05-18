@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION['role']) || $_SESSION['role'] != 1) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] != 2) {
     header('Location: ../login.php');
     exit();
 }
@@ -42,9 +42,6 @@ $total_views = $conn->query("SELECT SUM(count_view) as total FROM MOTEL")->fetch
                         <li class="sidebar-title">Menu Quản trị</li>
                         <li class="sidebar-item active">
                             <a href="index.php" class='sidebar-link'><i class="bi bi-grid-fill"></i> <span>Bảng điều khiển</span></a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="table-datatable.php" class='sidebar-link'><i class="bi bi-house-door-fill"></i> <span>Quản lý phòng trọ</span></a>
                         </li>
                         <li class="sidebar-item">
                             <a href="component-card.php" class='sidebar-link'><i class="bi bi-file-earmark-text-fill"></i> <span>Quản lý tin đăng</span></a>
