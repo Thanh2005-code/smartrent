@@ -16,7 +16,7 @@ if ($id > 0) {
     $edit = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     if (!$edit) {
-        header('Location: table-datatable.php');
+        header('Location: component-card.php');
         exit();
     }
 }
@@ -51,7 +51,7 @@ if (isset($_POST['btn_save'])) {
             $stmt->bind_param('ssiisssiissii', $title, $description, $price, $area, $address, $lating, $images, $user_id, $category_id, $district_id, $utilities, $phone, $approve);
         }
         if ($stmt->execute()) {
-            header('Location: table-datatable.php');
+            header('Location: component-card.php');
             exit();
         }
         $error = 'Lưu thất bại: ' . $stmt->error;
