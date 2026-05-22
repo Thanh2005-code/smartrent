@@ -75,6 +75,7 @@ $users = $conn->query('SELECT ID, Name FROM user ORDER BY Name');
                 <ul class="menu">
                     <li class="sidebar-title">Menu Quản trị</li>
                     <li class="sidebar-item"><a href="index.php" class="sidebar-link"><i class="bi bi-grid-fill"></i> <span>Bảng điều khiển</span></a></li>
+                     <li class="sidebar-item active"><a href="table-datatable.php" class="sidebar-link"><i class="bi bi-house-door-fill"></i> <span>Quản lý phòng trọ</span></a></li>
                     <li class="sidebar-item active"><a href="component-card.php" class="sidebar-link"><i class="bi bi-file-earmark-text-fill"></i> <span>Quản lý tin đăng</span></a></li>
                     <li class="sidebar-item"><a href="account-profile.php" class="sidebar-link"><i class="bi bi-people-fill"></i> <span>Quản lý tài khoản</span></a></li>
                     <li class="sidebar-item"><a href="ui-chart-apexcharts.php" class="sidebar-link"><i class="bi bi-bar-chart-fill"></i> <span>Thống kê</span></a></li>
@@ -122,9 +123,10 @@ $users = $conn->query('SELECT ID, Name FROM user ORDER BY Name');
                                 <label>Từ khóa</label>
                                 <input type="text" name="keyword" class="form-control" value="<?php echo htmlspecialchars($keyword); ?>">
                             </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100">Lọc</button>
-                            </div>
+                            <div class="col-md-2 d-flex gap-2">
+    <button type="submit" class="btn btn-primary w-50">Lọc</button>
+    <a href="form-layout.php" class="btn btn-success w-50"><i class="bi bi-plus-lg"></i> Thêm</a>
+</div>
                         </form>
                     </div>
                 </div>
@@ -140,21 +142,28 @@ $users = $conn->query('SELECT ID, Name FROM user ORDER BY Name');
                                     <th>Khu vực</th>
                                     <th>Ngày đăng</th>
                                     <th>Trạng thái</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php while ($row = $list->fetch_assoc()):
-                                list($lb, $cl) = smartrent_approve_label($row['approve']);
-                            ?>
-                                <tr>
-                                    <td><a href="form-layout.php?id=<?php echo (int) $row['ID']; ?>"><?php echo htmlspecialchars($row['title']); ?></a></td>
-                                    <td><?php echo htmlspecialchars($row['owner_name'] ?? ''); ?></td>
-                                    <td><?php echo number_format((int) $row['price']); ?> đ</td>
-                                    <td><?php echo htmlspecialchars($row['district_name'] ?? ''); ?></td>
-                                    <td><?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?></td>
-                                    <td><span class="badge <?php echo $cl; ?>"><?php echo $lb; ?></span></td>
-                                </tr>
-                            <?php endwhile; ?>
+                           <?php while ($row = $list->fetch_assoc()):
+    list($lb, $cl) = smartrent_approve_label($row['approve']);
+?>
+    <tr>
+        <td><a href="form-layout.php?id=<?php echo (int) $row['ID']; ?>"><?php echo htmlspecialchars($row['title']); ?></a></td>
+        <td><?php echo htmlspecialchars($row['owner_name'] ?? ''); ?></td>
+        <td><?php echo number_format((int) $row['price']); ?> đ</td>
+        <td><?php echo htmlspecialchars($row['district_name'] ?? ''); ?></td>
+        <td><?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?></td>
+        <td><span class="badge <?php echo $cl; ?>"><?php echo $lb; ?></span></td>
+        
+        <td>
+            <a href="form-layout.php?id=<?php echo (int) $row['ID']; ?>" class="btn btn-sm btn-outline-warning">
+                <i class="bi bi-pencil-fill"></i> Sửa
+            </a>
+        </td>
+    </tr> <?php endwhile; ?>
+    
                             </tbody>
                         </table>
                     </div>
