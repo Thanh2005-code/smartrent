@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 18, 2026 lúc 09:44 PM
--- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
+-- Host: 127.0.0.1
+-- Generation Time: May 23, 2026 at 08:14 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,36 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `qlpt`
+-- Database: `qlpt`
 --
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `districts`
+-- Table structure for table `contacts`
+--
+
+CREATE TABLE `contacts` (
+  `id` int(11) NOT NULL,
+  `fullname` varchar(255) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `message` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `user_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `contacts`
+--
+
+INSERT INTO `contacts` (`id`, `fullname`, `email`, `subject`, `message`, `created_at`, `user_id`) VALUES
+(3, 'Nguyễn Thị Thanh', 'Th@gmail.com', 'hi', 'Xin chào', '2026-05-23 17:58:28', 9);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `districts`
 --
 
 CREATE TABLE `districts` (
@@ -33,7 +56,7 @@ CREATE TABLE `districts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `districts`
+-- Dumping data for table `districts`
 --
 
 INSERT INTO `districts` (`ID`, `Name`) VALUES
@@ -46,7 +69,7 @@ INSERT INTO `districts` (`ID`, `Name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `motel`
+-- Table structure for table `motel`
 --
 
 CREATE TABLE `motel` (
@@ -70,21 +93,21 @@ CREATE TABLE `motel` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `motel`
+-- Dumping data for table `motel`
 --
 
 INSERT INTO `motel` (`ID`, `title`, `description`, `price`, `area`, `count_view`, `address`, `lating`, `images`, `user_id`, `category_id`, `district_id`, `utilities`, `created_at`, `phone`, `approve`, `status`) VALUES
-(1, 'Phòng trọ khép kín gần ĐH Vinh', 'Phòng rộng rãi, an ninh tốt, cách cổng chính ĐH Vinh 200m.', 1500000, 20, 151, 'Số 10 Bạch Liêu', NULL, 'phong1.jpg', 1, 1, 1, 'Wifi, Điều hòa, Nóng lạnh', '2026-05-15 17:28:43', '0987654321', 1, 0),
-(2, 'Chung cư mini cao cấp', 'Full nội thất, chỉ việc xách vali vào ở, giờ giấc tự do.', 3500000, 35, 303, 'Số 5 Nguyễn Du', NULL, 'phong2.jpg', 2, 2, 3, 'Giường, Tủ, Máy giặt, Điều hòa', '2026-05-15 17:28:43', '0912345678', 1, 0),
-(3, 'Nhà nguyên căn hẻm ô tô', 'Thích hợp ở ghép nhóm 4-5 người, điện nước giá dân.', 5000000, 80, 51, 'Ngõ 20 Phượng Hoàng', NULL, 'phong3.jpg', 3, 3, 2, 'Bếp, Sân phơi, Chỗ để xe', '2026-05-15 17:28:43', '0933334444', 1, 0),
-(4, 'Phòng trọ giá rẻ cho sinh viên', 'Khu trọ an ninh, chủ nhà thân thiện, không chung chủ.', 1200000, 15, 82, 'Số 8 Phong Đình Cảng', NULL, 'phong4.jpg', 1, 1, 4, 'Wifi, Giường cá nhân', '2026-05-15 17:28:43', '0987654321', 1, 0),
-(5, 'Căn hộ Studio hiện đại', 'Mới xây, thiết kế hiện đại, view đẹp. Đang chờ Admin duyệt.', 2500000, 25, 20, 'Số 12 Lê Lợi', NULL, 'phong5.jpg', 4, 2, 5, 'Full đồ, Thang máy, Khóa vân tay', '2026-05-15 17:28:43', '0999888777', 0, 0),
-(6, 'Phòng khép kín đầy đủ tiện nghi', NULL, 2000000, 40, 0, NULL, NULL, 'room_1779130857_de9bec84.jpg', 6, 1, 3, 'Có Wifi, Điều hòa, Khép kín', '2026-05-18 19:00:57', NULL, 0, 0);
+(8, 'Căn hộ mini đầy đủ tiện ích', NULL, 3000000, 50, 0, NULL, NULL, 'room_1779557055_b81462fd.jpg', 7, 3, 2, 'Có Wifi, Điều hòa, Chỗ để xe', '2026-05-23 17:24:15', NULL, 1, 0),
+(9, 'Chung cư đầy đủ tiện nghi', NULL, 4000000, 30, 0, NULL, NULL, 'room_1779557106_525f1e81.jpg', 7, 3, 3, 'Có Wifi, Điều hòa, Chỗ để xe, Khép kín', '2026-05-23 17:25:06', NULL, 1, 0),
+(10, 'Phòng khéo kín thoải mái', NULL, 2000000, 19, 0, NULL, NULL, 'room_1779557161_60a7e9b9.jpg', 7, 1, 5, 'Có Wifi, Chỗ để xe, Khép kín', '2026-05-23 17:26:01', NULL, 1, 0),
+(11, 'Nhà nguyên căn tiện ích xanh', NULL, 7000000, 60, 2, NULL, NULL, 'room_1779557244_8fabadee.jpg', 7, 2, 4, 'Có Wifi, Điều hòa, Chỗ để xe', '2026-05-23 17:27:24', NULL, 1, 0),
+(12, 'Phòng khép kín đầy đủ tiện nghi', 'có wf', 1200000, 30, 0, '', '', 'room_1779559243_1324ddf5.jpg', 10, 1, 1, 'Có Wifi', '2026-05-23 18:00:43', '0', 1, 0),
+(13, 'Chung cư mini', '', 3000000, 30, 0, '18/Nguyễn Văn Trỗi', '', 'room_1779559243_1324ddf5.jpg', 9, 1, 1, 'Có Wifi, Điều hòa, Khép kín', '2026-05-23 18:01:58', '357362696', 0, 0);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `user`
+-- Table structure for table `user`
 --
 
 CREATE TABLE `user` (
@@ -95,33 +118,41 @@ CREATE TABLE `user` (
   `Password` varchar(255) NOT NULL,
   `Role` int(11) DEFAULT 0,
   `Phone` varchar(255) DEFAULT NULL,
-  `Avatar` varchar(255) DEFAULT NULL
+  `Avatar` varchar(255) DEFAULT NULL,
+  `reset_done` int(1) DEFAULT 0,
+  `forgot_password` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `user`
+-- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`ID`, `Name`, `Username`, `Email`, `Password`, `Role`, `Phone`, `Avatar`) VALUES
-(1, 'Trần Thị Thanh', 'thanhadmin', 'thanh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 2, '0987654321', 'avatar_thanh.jpg'),
-(2, 'Trần Thị Ánh', 'anhuser', 'anh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0912345678', 'uploads/avatars/u2_260eb8c33be73a80.jpg'),
-(3, 'Trần Thị Thùy', 'thuyuser', 'thuy@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0933334444', 'avatar_thuy.jpg'),
-(4, 'Vương Đình Quang', 'quangvd', 'quangvd@vinhuni.edu.vn', 'e10adc3949ba59abbe56e057f20f883e', 1, '0999888777', 'avatar_quang.jpg'),
-(5, 'Nguyễn Văn Khách', 'khachthue', 'khach@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0909090909', 'avatar_khach.jpg'),
-(6, 'Nguyễn Thị Thủy', 'thuy', 'thanhthuyyyyyy194@gmail.com', 'f0070dd5f8ee4fc57840867cf2bc0d80', 1, '0352516343', NULL);
+INSERT INTO `user` (`ID`, `Name`, `Username`, `Email`, `Password`, `Role`, `Phone`, `Avatar`, `reset_done`, `forgot_password`) VALUES
+(1, 'Trần Thị Thanh', 'thanhadmin', 'thanh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 2, '0987654321', 'uploads/avatars/u1_aa80f9d73efec5f3.jpg', 0, NULL),
+(2, 'Trần Thị Ánh', 'anhuser', 'anh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 0, '0912345678', 'uploads/avatars/u2_260eb8c33be73a80.jpg', 0, NULL),
+(7, 'Hồ Thảo linh', 'Linh', 'tlinh110905@gmail.com', '7f1fc3dabeea16fea60c42665b3b33bf', 1, '0352516343', NULL, 0, NULL),
+(8, 'Trần Thị Lan Anh', 'Lanh', 'Lanh@gmail.com', '80eeb5345bbf5d97f03f91c96d24a49f', 0, '0352516343', NULL, 0, '1'),
+(9, 'Nguyễn Thị Thanh', 'tha', 'Th@gmail.com', 'f0070dd5f8ee4fc57840867cf2bc0d80', 0, '048547666', 'uploads/avatars/u9_7727fc64308b14b0.jpg', 0, NULL),
+(10, 'Trần Thị Thủy', 'Thuy', 'Thuy@gmail.com', '353519750965136863f0234c688b7ef7', 1, '03857362', 'uploads/avatars/u10_9eba800c250e14da.jpg', 0, NULL);
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Indexes for dumped tables
 --
 
 --
--- Chỉ mục cho bảng `districts`
+-- Indexes for table `contacts`
+--
+ALTER TABLE `contacts`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `districts`
 --
 ALTER TABLE `districts`
   ADD PRIMARY KEY (`ID`);
 
 --
--- Chỉ mục cho bảng `motel`
+-- Indexes for table `motel`
 --
 ALTER TABLE `motel`
   ADD PRIMARY KEY (`ID`),
@@ -129,90 +160,50 @@ ALTER TABLE `motel`
   ADD KEY `district_id` (`district_id`);
 
 --
--- Chỉ mục cho bảng `user`
+-- Indexes for table `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`ID`);
 
 --
--- AUTO_INCREMENT cho các bảng đã đổ
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT cho bảng `districts`
+-- AUTO_INCREMENT for table `contacts`
+--
+ALTER TABLE `contacts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `districts`
 --
 ALTER TABLE `districts`
   MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `motel`
+-- AUTO_INCREMENT for table `motel`
 --
 ALTER TABLE `motel`
-  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
--- AUTO_INCREMENT cho bảng `user`
+-- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- Các ràng buộc cho các bảng đã đổ
+-- Constraints for dumped tables
 --
 
 --
--- Các ràng buộc cho bảng `motel`
+-- Constraints for table `motel`
 --
 ALTER TABLE `motel`
   ADD CONSTRAINT `motel_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`ID`),
   ADD CONSTRAINT `motel_ibfk_2` FOREIGN KEY (`district_id`) REFERENCES `districts` (`ID`);
 COMMIT;
-
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `contacts`
---
-
-CREATE TABLE `contacts` (
-  `ID` int(10) NOT NULL,
-  `fullname` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `phone` varchar(255) DEFAULT NULL,
-  `subject` varchar(255) DEFAULT NULL,
-  `message` text NOT NULL,
-  `user_id` int(10) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Đang đổ dữ liệu cho bảng `contacts`
---
-
-INSERT INTO `contacts` (`ID`, `fullname`, `email`, `phone`, `subject`, `message`, `user_id`, `created_at`) VALUES
-(1, 'Trần Thị Ánh', 'anh@gmail.com', '0912345678', 'Hỏi về phòng trọ Bạch Liêu', 'Phòng trọ khép kín gần ĐH Vinh (ID: 1) còn trống không ạ? Mình muốn qua xem phòng vào chiều mai.', 2, '2026-05-16 02:10:00'),
-(2, 'Nguyễn Văn Khách', 'khach@gmail.com', '0909090909', 'Yêu cầu hỗ trợ tài khoản', 'Tài khoản của mình không đăng được bài viết mới, hệ thống cứ báo lỗi duyệt. Nhờ admin kiểm tra lại.', 5, '2026-05-16 04:15:30'),
-(3, 'Lê Văn Nam', 'namle99@gmail.com', '0988223344', 'Hợp tác cho thuê', 'Tôi có một tòa nhà chung cư mini 10 phòng ở khu vực Phường Hưng Dũng muốn đăng bài số lượng lớn, bên mình có gói ưu đãi nào không?', NULL, '2026-05-16 08:20:15');
-
---
--- Chỉ mục cho bảng `contacts`
---
-ALTER TABLE `contacts`
-  ADD PRIMARY KEY (`ID`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- AUTO_INCREMENT cho bảng `contacts`
---
-ALTER TABLE `contacts`
-  MODIFY `ID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- Các ràng buộc cho bảng `contacts`
---
-ALTER TABLE `contacts`
-  ADD CONSTRAINT `contacts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
