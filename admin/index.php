@@ -48,6 +48,12 @@ $total_views = $conn->query("SELECT SUM(count_view) as total FROM MOTEL")->fetch
                             <a href="component-card.php" class='sidebar-link'><i class="bi bi-file-earmark-text-fill"></i> <span>Quản lý tin đăng</span></a>
                         </li>
                         <li class="sidebar-item">
+                                            <a href="admin-contacts.php" class='sidebar-link'>
+                                            <i class="bi bi-envelope-fill"></i> 
+                                           <span>Quản lý liên hệ</span>
+                                            </a>
+                                               </li>
+                        <li class="sidebar-item">
                             <a href="account-profile.php" class='sidebar-link'><i class="bi bi-people-fill"></i> <span>Quản lý tài khoản</span></a>
                         </li>
                         <li class="sidebar-item">

@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Bảo mật hệ thống: Chỉ tài khoản Chủ trọ (Role = 1) mới được quyền vào trang đăng phòng
 if (!isset($_SESSION['role']) || (int)$_SESSION['role'] !== 1) {
     header('Location: index.php');
     exit();

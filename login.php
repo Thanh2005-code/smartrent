@@ -35,7 +35,7 @@ if (isset($_POST['btn_login'])) {
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 $_SESSION['login_failures'] = 0; // Reset số lần sai khi đăng nhập đúng
-
+                $_SESSION['email'] = $row['Email'];
                 $_SESSION['user_id'] = $row['ID'];
                 $_SESSION['fullname'] = $row['Name'];
                 $_SESSION['role'] = (int)$row['Role']; // Lưu Role (0, 1 hoặc 2) vào Session
