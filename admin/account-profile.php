@@ -146,9 +146,7 @@ if ($view_id > 0) {
                                     <tbody>
                                     <?php while ($u = $users->fetch_assoc()): ?>
                                     <tr>
-                                        <td><?php echo (int) $u['ID']; ?></td>
-                                        <td><?php echo htmlspecialchars($u['Name']); ?></td>
-                                        <td><?php echo htmlspecialchars($u['Username']); ?></td>
+                                        <td><?php echo htmlspecialchars($u['Username']); ?><?php if ($u['forgot_password'] == 1) : ?> <span class="badge bg-danger ms-1"> ! </span> <?php endif; ?></td>
                                         <td><?php echo htmlspecialchars($u['Email']); ?></td>
                                         <td>
                                                    <?php 
@@ -164,6 +162,7 @@ if ($view_id > 0) {
                                                                      </td>
                                         <td>
                                             <a href="?view=<?php echo (int) $u['ID']; ?>" class="btn btn-sm btn-info">Xem</a>
+                                            <?php if ($u['forgot_password'] == 1) : ?> <a href="reset-password.php?id=<?= $u['ID'] ?>" class="btn btn-warning btn-sm" onclick="return confirm('Reset mật khẩu về 123456 ?')"> RESET </a> <?php endif; ?>
                                             <a href="?delete=<?php echo (int) $u['ID']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Xóa tài khoản?')">Xóa</a>
                                         </td>
                                     </tr>

@@ -26,7 +26,7 @@ if (isset($_POST['btn_login'])) {
     }
 
     if ($error === '') {
-        $stmt = $conn->prepare('SELECT ID, Name, Email, Role, Avatar FROM user WHERE Username = ? AND Password = ?');
+        $stmt = $conn->prepare('SELECT ID, Name, Email, Role, Avatar,reset_done FROM user WHERE Username = ? AND Password = ?');
         if ($stmt) {
             $stmt->bind_param('ss', $username, $password_md5);
             $stmt->execute();
@@ -35,8 +35,10 @@ if (isset($_POST['btn_login'])) {
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 $_SESSION['login_failures'] = 0; // Reset số lần sai khi đăng nhập đúng
-
+                if ( $row['reset_done'] == 1 && $password_raw == '123456' ) { $stmt_reset_done = $conn->prepare(" UPDATE `user` SET reset_done = 0 WHERE ID = ? "); $stmt_reset_done->bind_param( "i", $row['ID'] ); $stmt_reset_done->execute(); }
                 $_SESSION['user_id'] = $row['ID'];
+
+
                 $_SESSION['fullname'] = $row['Name'];
                 $_SESSION['role'] = (int)$row['Role']; // Lưu Role (0, 1 hoặc 2) vào Session
                 $_SESSION['avatar'] = $row['Avatar'] ?? '';
@@ -87,6 +89,24 @@ if (isset($_POST['btn_login'])) {
                     <h1 class="auth-title">Đăng nhập.</h1>
                     <p class="auth-subtitle mb-5">Hệ thống quản lý phòng trọ.</p>
 
+                    <?php
+                        $check_reset = mysqli_query(
+                        $conn,
+                        "SELECT ID
+                        FROM `user`
+                        WHERE reset_done = 1
+                         LIMIT 1"
+                    );
+
+                    if (mysqli_num_rows($check_reset) > 0) :
+                    ?>
+
+                    <div class="alert alert-warning text-center">
+
+                            Admin đã reset mật khẩu.
+                            Mật khẩu mặc định mới là:
+                        <strong>123456</strong>
+                    </div><?php endif; ?> 
                     <form method="POST" action="">
 
                         <?php if ($error != '') {
@@ -134,6 +154,8 @@ if (isset($_POST['btn_login'])) {
                         </div>
                         <button type="submit" name="btn_login" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">Đăng nhập</button>
                     </form>
+                    
+                    <div class="text-center mt-3"><a href="forgot-password.php" class="text-danger fw-bold">Quên mật khẩu?</a></div>
 
                     <div class="text-center mt-5 text-lg fs-5">
                         <p class="text-gray-600">Chưa có tài khoản? <a href="register.php" class="font-bold">Đăng ký ngay</a>.</p>
