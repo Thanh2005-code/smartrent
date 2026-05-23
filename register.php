@@ -15,7 +15,7 @@ if (isset($_POST['btn_register'])) {
     $password_raw     = isset($_POST['password']) ? $_POST['password'] : '';
     $confirm_raw      = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '';
     
-    // BỔ SUNG: Lấy giá trị vai trò (0: Người thuê, 1: Chủ trọ)
+    // Lấy giá trị vai trò (0: Người thuê, 1: Chủ trọ)
     $role             = isset($_POST['role']) ? (int)$_POST['role'] : 0;
 
     // Kiểm tra mật khẩu
@@ -25,23 +25,33 @@ if (isset($_POST['btn_register'])) {
         // Mã hóa MD5
         $password_md5 = md5($password_raw);
 
-        // Kiểm tra trùng lặp (Đã sửa tên bảng từ 'users' thành 'user' cho đồng bộ với DB)
-        $check_sql = "SELECT ID FROM user WHERE Username='$username' OR Email='$email'";
-        $check_result = $conn->query($check_sql);
+        // BẢO MẬT: Dùng Prepared Statement để kiểm tra trùng lặp
+        $stmt_check = $conn->prepare("SELECT ID FROM user WHERE Username = ? OR Email = ?");
+        $stmt_check->bind_param('ss', $username, $email);
+        $stmt_check->execute();
+        $check_result = $stmt_check->get_result();
 
         if ($check_result && $check_result->num_rows > 0) {
             $error = "Tên đăng nhập hoặc Email đã tồn tại. Vui lòng chọn tên khác!";
         } else {
-            // Thêm vào CSDL cùng với biến $role
-            $insert_sql = "INSERT INTO user (Name, Username, Password, Email, Phone, Role) 
-                           VALUES ('$fullname', '$username', '$password_md5', '$email', '$phone', $role)";
+            // BẢO MẬT: Dùng Prepared Statement để Thêm vào CSDL
+            $stmt_insert = $conn->prepare("INSERT INTO user (Name, Username, Password, Email, Phone, Role) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt_insert->bind_param('sssssi', $fullname, $username, $password_md5, $email, $phone, $role);
             
-            if ($conn->query($insert_sql) === TRUE) {
-                $success = "Đăng ký thành công! Vui lòng chuyển sang trang Đăng nhập.";
+            if ($stmt_insert->execute()) {
+                // Tự động chuyển hướng sau khi đăng ký thành công
+                $success = "Đăng ký thành công! Đang chuyển hướng sang trang Đăng nhập trong 3 giây...";
+                echo "<script>
+                        setTimeout(function() {
+                            window.location.href = 'login.php';
+                        }, 3000);
+                      </script>";
             } else {
-                $error = "Lỗi hệ thống: " . $conn->error;
+                $error = "Lỗi hệ thống, không thể đăng ký lúc này.";
             }
+            $stmt_insert->close();
         }
+        $stmt_check->close();
     }
     $conn->close();
 }
@@ -93,7 +103,8 @@ if (isset($_POST['btn_register'])) {
                     </div>
 
                     <div class="form-group position-relative has-icon-left mb-4">
-                        <input type="email" class="form-control form-control-xl" name="email" placeholder="Email" required>
+                        <!-- Đã kích hoạt hàm validateEmail -->
+                        <input type="email" class="form-control form-control-xl" name="email" placeholder="Email" oninput="validateEmail(this)" required>
                         <div class="form-control-icon">
                             <i class="bi bi-envelope"></i>
                         </div>

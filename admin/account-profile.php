@@ -78,7 +78,7 @@ if ($view_id > 0) {
         <ul class="menu">
                     <li class="sidebar-title">Menu Quản trị</li>
                     <li class="sidebar-item"><a href="index.php" class="sidebar-link"><i class="bi bi-grid-fill"></i> <span>Bảng điều khiển</span></a></li>
-                     <li class="sidebar-item active"><a href="table-datatable.php" class="sidebar-link"><i class="bi bi-house-door-fill"></i> <span>Quản lý phòng trọ</span></a></li>
+                     <li class="sidebar-item"><a href="table-datatable.php" class="sidebar-link"><i class="bi bi-house-door-fill"></i> <span>Quản lý phòng trọ</span></a></li>
                     <li class="sidebar-item"><a href="component-card.php" class="sidebar-link"><i class="bi bi-file-earmark-text-fill"></i> <span>Quản lý tin đăng</span></a></li>
                     <li class="sidebar-item active"><a href="account-profile.php" class="sidebar-link"><i class="bi bi-people-fill"></i> <span>Quản lý tài khoản</span></a></li>
                     <li class="sidebar-item"><a href="ui-chart-apexcharts.php" class="sidebar-link"><i class="bi bi-bar-chart-fill"></i> <span>Thống kê</span></a></li>
@@ -104,12 +104,14 @@ if ($view_id > 0) {
                                     <div class="form-group mb-2"><label>Email</label><input type="email" name="email" class="form-control" required></div>
                                     <div class="form-group mb-2"><label>Mật khẩu</label><input type="password" name="password" class="form-control" required></div>
                                     <div class="form-group mb-2"><label>SĐT</label><input type="text" name="phone" class="form-control"></div>
-                                    <div class="form-group mb-2"><label>Vai trò</label>
-                                        <select name="role" class="form-select">
-                                            <option value="0">Người dùng</option>
-                                            <option value="1">Admin</option>
-                                        </select>
-                                    </div>
+                                    <div class="form-group mb-2">
+                                            <label>Vai trò</label>
+                                         <select name="role" class="form-select" required>
+                                                  <option value="0">Người dùng (Khách thuê)</option>
+                                                     <option value="1">Chủ trọ</option>
+                                                  <option value="2">Admin</option>
+                                                </select>
+                                        </div>
                                     <button type="submit" name="btn_add" class="btn btn-primary">Thêm</button>
                                 </form>
                             </div>
@@ -123,7 +125,14 @@ if ($view_id > 0) {
                                 <p><strong>Username:</strong> <?php echo htmlspecialchars($view_user['Username']); ?></p>
                                 <p><strong>Email:</strong> <?php echo htmlspecialchars($view_user['Email']); ?></p>
                                 <p><strong>SĐT:</strong> <?php echo htmlspecialchars($view_user['Phone'] ?? ''); ?></p>
-                                <p><strong>Vai trò:</strong> <?php echo (int) $view_user['Role'] === 1 ? 'Admin' : 'Người dùng'; ?></p>
+                                <p><strong>Vai trò:</strong> 
+                                                  <?php 
+                                                     $r = (int) $view_user['Role'];
+                                                      if ($r === 2) echo 'Admin';
+                                                              elseif ($r === 1) echo 'Chủ trọ';
+                                                             else echo 'Người dùng';
+                                                         ?>
+                                                     </p>
                             </div>
                             </div>
                         <?php endif; ?>
@@ -141,7 +150,18 @@ if ($view_id > 0) {
                                         <td><?php echo htmlspecialchars($u['Name']); ?></td>
                                         <td><?php echo htmlspecialchars($u['Username']); ?></td>
                                         <td><?php echo htmlspecialchars($u['Email']); ?></td>
-                                        <td><?php echo (int) $u['Role'] === 1 ? 'Admin' : 'User'; ?></td>
+                                        <td>
+                                                   <?php 
+                                                             $r = (int) $u['Role'];
+                                                                  if ($r === 2) {
+                                                                      echo '<span class="badge bg-danger">Admin</span>';
+                                                                     } elseif ($r === 1) {
+                                                                      echo '<span class="badge bg-primary">Chủ trọ</span>';
+                                                                      } else {
+                                                                     echo '<span class="badge bg-secondary">Người dùng</span>';
+                                                                        }
+                                                                 ?>
+                                                                     </td>
                                         <td>
                                             <a href="?view=<?php echo (int) $u['ID']; ?>" class="btn btn-sm btn-info">Xem</a>
                                             <a href="?delete=<?php echo (int) $u['ID']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Xóa tài khoản?')">Xóa</a>
