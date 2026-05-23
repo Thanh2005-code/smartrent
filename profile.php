@@ -322,13 +322,17 @@ if ($stmt_my_list) {
     <?php endif; ?>
 
     <ul class="nav nav-tabs nav-tabs-custom mb-4" id="profileTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-pane" type="button" role="tab">Thông tin tài khoản</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="motel-tab" data-bs-toggle="tab" data-bs-target="#motel-pane" type="button" role="tab">Tin đăng của tôi (<?php echo count($my_motels); ?>)</button>
-        </li>
-    </ul>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-pane" type="button" role="tab">Thông tin tài khoản</button>
+    </li>
+    
+    <!-- CHỈ HIỆN TAB NÀY NẾU LÀ CHỦ TRỌ HOẶC ADMIN -->
+    <?php if ($_SESSION['role'] == 1 || $_SESSION['role'] == 2): ?>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="motel-tab" data-bs-toggle="tab" data-bs-target="#motel-pane" type="button" role="tab">Tin đăng của tôi (<?php echo count($my_motels); ?>)</button>
+    </li>
+    <?php endif; ?>
+</ul>
 
     <div class="tab-content">
         <div class="tab-pane fade show active" id="info-pane" role="tabpanel">
@@ -397,8 +401,9 @@ if ($stmt_my_list) {
                 </div>
             </div>
         </div>
-
+             <?php if ($_SESSION['role'] == 1 || $_SESSION['role'] == 2): ?>
         <div class="tab-pane fade" id="motel-pane" role="tabpanel">
+            <?php endif; ?>
             <div class="profile-card">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4>Danh sách phòng trọ bạn đã đăng</h4>

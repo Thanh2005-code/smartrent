@@ -9,5 +9,4 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Kết nối Database thất bại: " . $conn->connect_error);
 }
-// echo "Tuyệt vời, đã kết nối CSDL qlpt thành công!";
 ?>

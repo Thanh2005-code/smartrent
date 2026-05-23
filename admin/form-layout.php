@@ -7,13 +7,13 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 2) {
 require_once __DIR__ . '/../includes/helpers.php';
 include '../connect.php';
 
-$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;//lấy ID của tin đăng cần sửa từ tham số GET, nếu không có thì mặc định là 0 (thêm mới)
 $edit = null;
 if ($id > 0) {
     $stmt = $conn->prepare('SELECT * FROM motel WHERE ID = ?');
     $stmt->bind_param('i', $id);
     $stmt->execute();
-    $edit = $stmt->get_result()->fetch_assoc();
+    $edit = $stmt->get_result()->fetch_assoc();//lấy thông tin chi tiết của tin đăng cần sửa để hiển thị trong form, nếu không tìm thấy thì $edit sẽ là null
     $stmt->close();
     if (!$edit) {
         header('Location: component-card.php');
@@ -26,7 +26,7 @@ $districts = $conn->query('SELECT ID, Name FROM districts ORDER BY Name');
 $error = '';
 
 if (isset($_POST['btn_save'])) {
-    $title = trim($_POST['title'] ?? '');
+    $title = trim($_POST['title'] ?? '');//lấy dữ liệu từ form bằng phương thức POST
     $description = trim($_POST['description'] ?? '');
     $price = (int) ($_POST['price'] ?? 0);
     $area = (int) ($_POST['area'] ?? 0);
@@ -41,7 +41,7 @@ if (isset($_POST['btn_save'])) {
     $approve = (int) ($_POST['approve'] ?? 0);
 
     if ($title === '' || $price <= 0 || $user_id <= 0 || $district_id <= 0) {
-        $error = 'Vui lòng nhập đầy đủ tiêu đề, giá, người đăng và khu vực.';
+        $error = 'Vui lòng nhập đầy đủ tiêu đề, giá, người đăng và khu vực.';//ktra tính hợp lệ, không được bỏ trống
     } else {
         if ($id > 0) {
             $stmt = $conn->prepare('UPDATE motel SET title=?, description=?, price=?, area=?, address=?, lating=?, images=?, user_id=?, category_id=?, district_id=?, utilities=?, phone=?, approve=? WHERE ID=?');
@@ -87,8 +87,8 @@ $v = function ($key, $default = '') use ($edit) {
         <ul class="menu">
                     <li class="sidebar-title">Menu Quản trị</li>
                     <li class="sidebar-item"><a href="index.php" class="sidebar-link"><i class="bi bi-grid-fill"></i> <span>Bảng điều khiển</span></a></li>
-                    <li class="sidebar-item active"><a href="table-datatable.php" class="sidebar-link"><i class="bi bi-house-door-fill"></i> <span>Quản lý phòng trọ</span></a></li>
-                    <li class="sidebar-item"><a href="component-card.php" class="sidebar-link"><i class="bi bi-file-earmark-text-fill"></i> <span>Quản lý tin đăng</span></a></li>
+                    <li class="sidebar-item"><a href="table-datatable.php" class="sidebar-link"><i class="bi bi-house-door-fill"></i> <span>Quản lý phòng trọ</span></a></li>
+                    <li class="sidebar-item active"><a href="component-card.php" class="sidebar-link"><i class="bi bi-file-earmark-text-fill"></i> <span>Quản lý tin đăng</span></a></li>
                     <li class="sidebar-item"><a href="account-profile.php" class="sidebar-link"><i class="bi bi-people-fill"></i> <span>Quản lý tài khoản</span></a></li>
                     <li class="sidebar-item"><a href="ui-chart-apexcharts.php" class="sidebar-link"><i class="bi bi-bar-chart-fill"></i> <span>Thống kê</span></a></li>
                     <li class="sidebar-item"><a href="../logout.php" class="sidebar-link"><i class="bi bi-box-arrow-right"></i> <span>Đăng xuất</span></a></li>
@@ -178,7 +178,7 @@ $v = function ($key, $default = '') use ($edit) {
                                 </div>
                             </div>
                             <button type="submit" name="btn_save" class="btn btn-primary">Lưu</button>
-                            <a href="table-datatable.php" class="btn btn-light">Hủy</a>
+                            <a href="component-card.php" class="btn btn-light">Hủy</a>
                             </form>
             </div>
         </div>
