@@ -59,6 +59,12 @@ $total_views = $conn->query("SELECT SUM(count_view) as total FROM MOTEL")->fetch
                         <li class="sidebar-item">
                             <a href="ui-chart-apexcharts.php" class='sidebar-link'><i class="bi bi-bar-chart-fill"></i> <span>Thống kê</span></a>
                         </li>
+                        
+                        <li class="sidebar-item">
+                            <a href="change-password.php" class='sidebar-link'><i class="bi bi-key-fill"></i><span>Đổi mật khẩu</span></a>
+                        </li>
+
+
                         <li class="sidebar-item">
                             <a href="../logout.php" class='sidebar-link'><i class="bi bi-box-arrow-right"></i> <span>Đăng xuất</span></a>
                         </li>
