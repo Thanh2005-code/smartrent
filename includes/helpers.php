@@ -28,5 +28,31 @@ function smartrent_approve_label($approve)
     if ($approve === 3) return ['Đã từ chối', 'bg-danger']; // Trạng thái mới
     return ['Chờ duyệt', 'bg-warning'];
 }
-// ... Các hàm khác giữ nguyên ...
+function smartrent_motel_image($filename) {
+    // Nếu có tên file ảnh và file đó tồn tại trong thư mục
+    if (!empty($filename) && file_exists(__DIR__ . '/../assets/images/' . $filename)) {
+        return 'assets/images/' . $filename;
+    }
+    // Nếu không có ảnh hoặc lỗi, trả về ảnh mặc định
+    return 'assets/images/property-01.jpg'; 
+}
+function smartrent_category_name($id) {
+    $id = (int)$id;
+    if ($id === 1) return 'Phòng khép kín';
+    if ($id === 2) return 'Nhà nguyên căn';
+    if ($id === 3) return 'Chung cư mini';
+    return 'Chưa phân loại';
+}
+function smartrent_map_embed_url($lating) {
+    // Làm sạch khoảng trắng
+    $lating = trim((string)$lating);
+    
+    // Nếu chủ trọ không nhập tọa độ, đặt vị trí mặc định là Trường Đại học Vinh
+    if ($lating === '') {
+        return 'https://maps.google.com/maps?q=18.673321,105.692279&output=embed';
+    }
+    
+    // Nếu có tọa độ, mã hóa tọa độ an toàn và nối vào cấu trúc link của Google Maps
+    $lating = urlencode($lating);
+    return "https://maps.google.com/maps?q={$lating}&output=embed";}
 ?>

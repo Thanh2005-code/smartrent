@@ -30,7 +30,7 @@ $conn->query('UPDATE motel SET count_view = count_view + 1 WHERE ID = ' . $id);
 
 $image_file = smartrent_motel_image($m['images']);
 $category_name = smartrent_category_name($m['category_id']);
-$map_url = smartrent_map_embed_url($m['lating'], $m['address']);
+$map_url = smartrent_map_embed_url($m['lating']);
 $owner_avatar = smartrent_avatar_url($m['owner_avatar']);
 $price_fmt = number_format((int) $m['price'], 0, ',', '.');
 $created_fmt = date('d/m/Y', strtotime($m['created_at']));
@@ -130,7 +130,7 @@ $created_fmt = date('d/m/Y', strtotime($m['created_at']));
       <div class="row">
         <div class="col-lg-8">
           <div class="main-image">
-            <img src="assets/images/<?php echo htmlspecialchars($image_file); ?>" alt="Hình ảnh phòng trọ">
+            <img src="<?php echo htmlspecialchars($image_file); ?>" alt="Hình ảnh phòng trọ">
           </div>
           <div class="main-content">
             <span class="category"><?php echo htmlspecialchars($category_name); ?></span>
