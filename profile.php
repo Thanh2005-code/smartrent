@@ -260,6 +260,7 @@ if ($stmt_my_list) {
             border-bottom: 3px solid #f35525;
             background: none;
         }
+        
     </style>
 </head>
 

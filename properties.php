@@ -21,7 +21,7 @@ $sql_count = "SELECT COUNT(motel.ID) as total_records
               FROM motel 
               JOIN districts ON motel.district_id = districts.ID 
               JOIN user ON motel.user_id = user.ID 
-              WHERE " . $search['sql'];
+              WHERE " . $search['where']; 
 $stmt_count = $conn->prepare($sql_count);
 if ($search['types'] !== '') {
     $stmt_count->bind_param($search['types'], ...$search['params']);
@@ -36,7 +36,7 @@ $sql = "SELECT motel.*, districts.Name AS district_name, user.Name AS owner_name
         FROM motel
         JOIN districts ON motel.district_id = districts.ID
         JOIN user ON motel.user_id = user.ID
-        WHERE " . $search['sql'] . "
+        WHERE " . $search['where'] . " 
         ORDER BY motel.created_at DESC 
         LIMIT $offset, $limit";
 $stmt = $conn->prepare($sql);
@@ -60,6 +60,20 @@ $list_res = $stmt->get_result();
     <link rel="stylesheet" href="assets/css/owl.css">
     <link rel="stylesheet" href="assets/css/animate.css">
     <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
+    <style>
+        .navbar-avatar {
+            width: 30px !important;
+            height: 30px !important;
+            object-fit: cover;
+            border-radius: 50%;
+            vertical-align: middle;
+            display: inline-block;
+        }
+        /* Đảm bảo logo luôn gọn */
+        .logo h1 {
+            font-size: 24px !important;
+        }
+    </style>
   </head>
 
 <body>
